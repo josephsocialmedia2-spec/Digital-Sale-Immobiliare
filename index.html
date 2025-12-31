@@ -1,0 +1,1172 @@
+<!-- =========================================================
+     FILE UNICO: sistema_unico.html
+     CONTIENE:
+     1) CONTROL CENTER (Home / Impostazioni)
+     2) CHECKLIST GIORNALIERA (Mobile)
+     3) MANAGER VIEW (KPI + Soldi)
+
+     COME SI USA (semplice):
+     - Apri: TAB "HOME" -> metti Nome + WhatsApp + link ChatGPT -> SALVA
+     - Ogni giorno: TAB "OGGI" -> fai, spunta, salva
+     - 1-2 volte a settimana: TAB "MANAGER" -> guarda numeri e stima €
+
+     DATI SALVATI IN LOCALE (offline):
+     - Profile:    LS_PROFILE = "cc_profile_v1"
+     - KPI/Log:    LS_KPI     = "roadmap_kpi_v1"
+========================================================= -->
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Sistema Unico – Control Center + Checklist + Manager</title>
+  <style>
+    :root{
+      --bg:#0b1120;
+      --text:#f3f4f6;
+      --muted:#a0adb8;
+      --gold:#d8a23a;
+      --success:#4a8f72;
+      --error:#ff2d2d;
+      --info:#5788d4;
+      --border: rgba(225,225,225,0.14);
+      --shadow: 0 14px 50px rgba(0,0,0,0.45);
+      --radius: 18px;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0; font-family:var(--sans); color:var(--text);
+      background:
+        radial-gradient(900px 500px at 15% 10%, rgba(216,162,58,.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 30%, rgba(123,79,189,.14), transparent 55%),
+        radial-gradient(900px 600px at 70% 85%, rgba(74,143,114,.14), transparent 55%),
+        var(--bg);
+      min-height:100vh;
+    }
+    .wrap{ max-width:1100px; margin:0 auto; padding:14px 12px 92px; }
+
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px; flex-wrap:wrap; margin-bottom:10px;
+    }
+    .title{
+      font-weight:1000; letter-spacing:.3px; font-size:14px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .pill{
+      font-size:10px; color:var(--muted); padding:6px 10px; border:1px solid var(--border);
+      border-radius:999px; background:rgba(0,0,0,.18); font-weight:900; letter-spacing:.2px;
+      display:inline-flex; gap:8px; align-items:center; white-space:nowrap;
+    }
+    .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .btn{
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:950;
+      letter-spacing:.2px;
+      font-size:11px;
+      line-height:1;
+      white-space:nowrap;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      user-select:none;
+      transition: transform .14s ease, filter .14s ease, box-shadow .14s ease, border-color .14s ease;
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+    }
+    .btn:hover{
+      transform: translateY(-2px) scale(1.01);
+      border-color: rgba(216,162,58,.22);
+      box-shadow: 0 14px 34px rgba(0,0,0,.30);
+      filter: brightness(1.06);
+    }
+    .btn:active{ transform: translateY(0px) scale(.99); }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(216,162,58,.95), rgba(216,162,58,.72));
+      color:#111; border-color: rgba(216,162,58,.55);
+    }
+    .btn.danger{
+      background: linear-gradient(135deg, rgba(255,45,45,.92), rgba(255,45,45,.55));
+      color:#120707; border-color: rgba(255,45,45,.55);
+    }
+
+    .tabs{
+      display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 12px;
+    }
+    .tab{
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.18);
+      color:var(--muted);
+      padding:10px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:1000;
+      font-size:11px;
+      letter-spacing:.2px;
+      display:inline-flex; align-items:center; gap:8px;
+      user-select:none;
+    }
+    .tab.active{
+      background: rgba(216,162,58,.18);
+      border-color: rgba(216,162,58,.40);
+      color: var(--text);
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .section{ padding:12px; }
+    .section + .section{ border-top:1px solid rgba(255,255,255,.10); }
+    .h{
+      margin:0 0 10px;
+      font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; font-weight:950;
+    }
+    .subtle{ font-size:11px; color:var(--muted); line-height:1.35; margin-top:6px; }
+
+    input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18);
+      color:var(--text);
+      outline:none;
+      font-weight:850;
+      font-size:12px;
+    }
+    input:focus{
+      border-color: rgba(216,162,58,.45);
+      box-shadow: 0 0 0 6px rgba(216,162,58,.12);
+    }
+    input[type="number"]{ font-variant-numeric: tabular-nums; }
+
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media (max-width: 720px){ .grid2{ grid-template-columns:1fr; } }
+
+    .mono{
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--muted);
+      white-space:pre-wrap;
+      word-break:break-word;
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px;
+      padding:10px;
+    }
+
+    /* ===== AGENDA WIDGET ===== */
+    .agendaWidget{
+      margin: 0 0 12px;
+      padding: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      background: rgba(0,0,0,.16);
+      box-shadow: 0 12px 30px rgba(0,0,0,.28);
+      border-left: 4px solid var(--gold);
+    }
+    .agendaHead{ display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+    .agendaHead b{ font-size:12px; font-weight:1000; }
+    .agendaTag{
+      font-size:10px; font-weight:950;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.14);
+      color: var(--muted);
+      display:inline-flex; align-items:center; gap:8px;
+      white-space:nowrap;
+    }
+    .agendaBody{ font-size:12px; line-height:1.35; }
+    .agendaLine{ margin-top:6px; color: var(--text); }
+    .agendaLine span{ color: var(--muted); font-weight:900; }
+    .agendaNote{ margin-top:8px; font-size:11px; color: var(--muted); }
+
+    /* ===== CHECKLIST ITEM ===== */
+    .helpBox{
+      margin: 0 0 10px;
+      padding:10px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+      font-size:11px;
+      color: var(--muted);
+      line-height:1.35;
+    }
+    .helpBox b{ color: var(--text); }
+
+    .item{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:10px; border:1px solid rgba(255,255,255,.10); border-radius:14px;
+      background: rgba(0,0,0,.14);
+      margin-top:8px;
+    }
+    .left{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .emoji{
+      width:30px; height:30px; border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.12);
+      font-size:15px; flex:0 0 auto;
+    }
+    .meta{ min-width:0; }
+    .meta b{ display:block; font-size:12px; font-weight:1000; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .meta small{ display:block; font-size:11px; color:var(--muted); margin-top:3px; line-height:1.2; }
+    .toggle{
+      width:44px; height:28px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.05);
+      position:relative;
+      cursor:pointer;
+      flex:0 0 auto;
+      transition: all .14s ease;
+    }
+    .toggle::after{
+      content:""; position:absolute; top:3px; left:3px;
+      width:22px; height:22px; border-radius:999px;
+      background: rgba(255,255,255,.20); transition: all .14s ease;
+    }
+    .toggle.on{ background: rgba(74,143,114,.25); border-color: rgba(74,143,114,.45); }
+    .toggle.on::after{ left: 19px; background: rgba(74,143,114,.95); }
+
+    /* ===== MANAGER KPI ===== */
+    .layout{ display:grid; grid-template-columns: 1fr 420px; gap:12px; align-items:start; }
+    @media (max-width: 980px){ .layout{ grid-template-columns:1fr; } }
+    .kpis{ display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:10px; }
+    @media (max-width: 720px){ .kpis{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media (max-width: 520px){ .kpis{ grid-template-columns:1fr; } }
+    .kpi{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.16);
+      border-radius:14px;
+      padding:10px;
+    }
+    .kpi .t{ font-size:10px; color:var(--muted); font-weight:950; letter-spacing:.6px; text-transform:uppercase; }
+    .kpi .v{ font-size:22px; font-weight:1000; margin-top:4px; line-height:1.1; }
+    .kpi .s{ font-size:11px; color:var(--muted); margin-top:4px; line-height:1.25; }
+
+    .barWrap{
+      margin-top:10px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      background: rgba(0,0,0,.12);
+      padding:10px;
+    }
+    .barRow{ margin-top:10px; }
+    .barLabel{
+      display:flex; justify-content:space-between; gap:10px;
+      font-size:11px; color:var(--muted);
+      margin-bottom:6px;
+    }
+    .bar{
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .fill{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(216,162,58,.95), rgba(74,143,114,.85));
+      border-radius: 999px;
+      transition: width .35s ease;
+    }
+
+    .bottom{
+      position:fixed; left:0; right:0; bottom:0;
+      padding:10px 12px;
+      background: rgba(0,0,0,.35);
+      border-top: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(8px);
+      display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      z-index:50;
+    }
+
+    .view{ display:none; }
+    .view.active{ display:block; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <span class="pill">🧩 Sistema Unico</span>
+        <span id="hdrHello">—</span>
+      </div>
+      <div class="row">
+        <button class="btn" id="btnPrev">⬅️</button>
+        <button class="btn" id="btnToday">📅 Oggi</button>
+        <button class="btn" id="btnNext">➡️</button>
+      </div>
+      <div class="row" style="width:100%; justify-content:space-between;">
+        <span class="pill" id="pillDate">—</span>
+        <span class="pill" id="pillMonth">—</span>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="home">🏠 Home</div>
+      <div class="tab" data-tab="oggi">✅ Oggi</div>
+      <div class="tab" data-tab="manager">📊 Manager</div>
+    </div>
+
+    <!-- =========================
+         VIEW: HOME / CONTROL CENTER
+    ========================== -->
+    <div class="view active" id="view-home">
+      <div class="card">
+        <div class="section">
+          <p class="h">Control Center (impostazioni 1 volta)</p>
+
+          <div class="grid2">
+            <div>
+              <div class="subtle">Nome (solo per vederti scritto in alto)</div>
+              <input id="inName" placeholder="es. Joseph" />
+            </div>
+            <div>
+              <div class="subtle">WhatsApp (numero con prefisso)</div>
+              <input id="inWa" placeholder="es. +39XXXXXXXXXX" />
+            </div>
+          </div>
+
+          <div class="subtle" style="margin-top:10px;">Link ChatGPT (se vuoi aprirlo con un tasto)</div>
+          <input id="inChatgpt" placeholder="https://chat.openai.com/..." />
+
+          <div class="row" style="margin-top:10px;">
+            <button class="btn primary" id="btnSaveProfile">💾 Salva impostazioni</button>
+            <button class="btn" id="btnOpenWa">📲 Apri WhatsApp</button>
+            <button class="btn" id="btnOpenChatgpt">🤖 Apri ChatGPT</button>
+          </div>
+
+          <div class="mono" id="boxProfile" style="margin-top:10px;">—</div>
+
+          <div class="helpBox" style="margin-top:12px;">
+            <b>Regola semplice:</b><br>
+            - Ogni giorno vai su <b>✅ Oggi</b> e fai almeno <b>4 su 6</b>.<br>
+            - Se sei KO: usa <b>🚑 Modalità Emergenza</b> e chiudi la giornata.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================
+         VIEW: OGGI / CHECKLIST
+    ========================== -->
+    <div class="view" id="view-oggi">
+      <!-- AGENDA -->
+      <div class="agendaWidget">
+        <div class="agendaHead">
+          <b id="agendaTitle">🗓️ —</b>
+          <span class="agendaTag" id="agendaTag">🎯 Focus: —</span>
+        </div>
+        <div class="agendaBody">
+          <div class="agendaLine" id="agendaLine1"><span>🎥</span> —</div>
+          <div class="agendaLine" id="agendaLine2"><span>📞</span> —</div>
+          <div class="agendaNote">Regola: fai queste cose e poi spunta.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section">
+          <p class="h">Checklist di oggi (semplice)</p>
+
+          <div class="helpBox">
+            <b>Obiettivo:</b> fai almeno <b>4 cose su 6</b>.<br>
+            <b>Modalità Emergenza</b>: spunta 2 cose base e basta.
+          </div>
+
+          <div class="item" data-key="video_done">
+            <div class="left">
+              <div class="emoji">🎥</div>
+              <div class="meta"><b>Ho pubblicato 1 video</b><small>anche corto</small></div>
+            </div>
+            <div class="toggle" role="switch" aria-checked="false" tabindex="0"></div>
+          </div>
+
+          <div class="item">
+            <div class="left">
+              <div class="emoji">📇</div>
+              <div class="meta"><b>Contatti nuovi</b><small>scrivi quanti</small></div>
+            </div>
+            <input id="inContacts" type="number" min="0" step="1" inputmode="numeric" style="width:140px" />
+          </div>
+
+          <div class="item">
+            <div class="left">
+              <div class="emoji">📞</div>
+              <div class="meta"><b>Messaggi di richiamo</b><small>(follow-up) quanti?</small></div>
+            </div>
+            <input id="inFollowups" type="number" min="0" step="1" inputmode="numeric" style="width:140px" />
+          </div>
+
+          <div class="item" data-key="conversation_done">
+            <div class="left">
+              <div class="emoji">💬</div>
+              <div class="meta"><b>Ho parlato con 1 proprietario</b><small>chat/telefono va bene</small></div>
+            </div>
+            <div class="toggle" role="switch" aria-checked="false" tabindex="0"></div>
+          </div>
+
+          <div class="item" data-key="appointment_done">
+            <div class="left">
+              <div class="emoji">🗓️</div>
+              <div class="meta"><b>Ho fissato un prossimo passo</b><small>data/ora o azione chiara</small></div>
+            </div>
+            <div class="toggle" role="switch" aria-checked="false" tabindex="0"></div>
+          </div>
+
+          <div class="item" data-key="kpi_updated">
+            <div class="left">
+              <div class="emoji">✅</div>
+              <div class="meta"><b>Ho aggiornato i numeri</b><small>cioè ho segnato oggi</small></div>
+            </div>
+            <div class="toggle" role="switch" aria-checked="false" tabindex="0"></div>
+          </div>
+
+          <div class="row" style="margin-top:12px;">
+            <button class="btn primary" id="btnSaveDay">💾 Salva</button>
+            <button class="btn" id="btnVital">🚑 Modalità Emergenza</button>
+          </div>
+
+          <div class="mono" id="boxMonth" style="margin-top:10px;">—</div>
+        </div>
+
+        <div class="section">
+          <p class="h">Soldi (stima – opzionale)</p>
+
+          <div class="helpBox">
+            <b>Conversazioni per 1 incarico</b> = quante conversazioni “vere” ti servono per ottenere 1 incarico.<br>
+            Esempio: 30 significa <b>30 conversazioni → 1 incarico</b>.
+          </div>
+
+          <div class="grid2">
+            <div>
+              <div class="subtle">Conversazioni per 1 incarico</div>
+              <input id="inConvPerInc" type="number" min="1" step="1" inputmode="numeric" />
+            </div>
+            <div>
+              <div class="subtle">€ medi per 1 incarico</div>
+              <input id="inEuroPerInc" type="number" min="0" step="100" inputmode="numeric" />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <button class="btn" id="btnSaveMoney">✅ Salva numeri</button>
+          </div>
+
+          <div class="mono" id="boxFormula" style="margin-top:10px;">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================
+         VIEW: MANAGER
+    ========================== -->
+    <div class="view" id="view-manager">
+      <div class="layout">
+        <div class="card">
+          <div class="section">
+            <!-- AGENDA (anche qui) -->
+            <div class="agendaWidget">
+              <div class="agendaHead">
+                <b id="mAgendaTitle">🗓️ —</b>
+                <span class="agendaTag" id="mAgendaTag">🎯 Focus: —</span>
+              </div>
+              <div class="agendaBody">
+                <div class="agendaLine" id="mAgendaLine1"><span>🎥</span> —</div>
+                <div class="agendaLine" id="mAgendaLine2"><span>📞</span> —</div>
+              </div>
+            </div>
+
+            <p class="h">KPI del mese</p>
+            <div class="kpis">
+              <div class="kpi"><div class="t">Video</div><div class="v" id="kVideos">—</div><div class="s">quanti video</div></div>
+              <div class="kpi"><div class="t">Contatti</div><div class="v" id="kContacts">—</div><div class="s">contatti nuovi</div></div>
+              <div class="kpi"><div class="t">Richiami</div><div class="v" id="kFollowups">—</div><div class="s">follow-up</div></div>
+              <div class="kpi"><div class="t">Parlato</div><div class="v" id="kConvs">—</div><div class="s">1 = 1 proprietario</div></div>
+              <div class="kpi"><div class="t">Prossimi passi</div><div class="v" id="kAppt">—</div><div class="s">date/ore fissate</div></div>
+              <div class="kpi"><div class="t">Giornate OK</div><div class="v" id="kWins">—</div><div class="s">≥ 4 su 6</div></div>
+            </div>
+
+            <div class="barWrap">
+              <p class="h">Progress (target medio)</p>
+              <div class="barRow">
+                <div class="barLabel"><span>Video</span><span id="lblVideo">—</span></div>
+                <div class="bar"><div class="fill" id="barVideo"></div></div>
+              </div>
+              <div class="barRow">
+                <div class="barLabel"><span>Parlato</span><span id="lblConvs">—</span></div>
+                <div class="bar"><div class="fill" id="barConvs"></div></div>
+              </div>
+              <div class="barRow">
+                <div class="barLabel"><span>Prossimi passi</span><span id="lblAppt">—</span></div>
+                <div class="bar"><div class="fill" id="barAppt"></div></div>
+              </div>
+            </div>
+
+            <div class="mono" id="boxAdvice" style="margin-top:10px;">—</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section">
+            <p class="h">Soldi (stima) + Target</p>
+
+            <div class="mono" style="margin-bottom:10px;">
+Significato:
+- "Conversazioni per 1 incarico" = quante conversazioni “vere” per 1 incarico.
+- "€ medi per 1 incarico" = valore medio incarico.
+            </div>
+
+            <div class="grid2">
+              <div>
+                <div class="subtle">Conversazioni per 1 incarico</div>
+                <input id="mConvPerInc" type="number" min="1" step="1" inputmode="numeric" />
+              </div>
+              <div>
+                <div class="subtle">€ medi per 1 incarico</div>
+                <input id="mEuroPerInc" type="number" min="0" step="100" inputmode="numeric" />
+              </div>
+            </div>
+
+            <div class="grid2" style="margin-top:10px;">
+              <div>
+                <div class="subtle">Target € mese</div>
+                <input id="mTargetEuro" type="number" min="0" step="100" inputmode="numeric" />
+              </div>
+              <div>
+                <div class="subtle">Target incarichi mese</div>
+                <input id="mTargetInc" type="number" min="0" step="1" inputmode="numeric" />
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <button class="btn primary" id="btnSaveManagerSettings">✅ Salva numeri</button>
+              <button class="btn danger" id="btnResetAll">🗑️ Reset TUTTO</button>
+            </div>
+
+            <div class="mono" id="boxRevenue" style="margin-top:10px;">—</div>
+
+            <div class="helpBox" style="margin-top:10px;">
+              <b>Reset TUTTO</b> cancella: profilo + KPI. Usalo solo se hai combinato casino.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom">
+    <span class="pill" id="pillLeft">Stato: —</span>
+    <span class="pill" id="pillRight">€ stimati: —</span>
+  </div>
+
+  <script>
+    /* =========================================================
+       STORAGE KEYS
+    ========================================================= */
+    const LS_PROFILE = "cc_profile_v1";
+    const LS_KPI     = "roadmap_kpi_v1";
+    const bc = ("BroadcastChannel" in window) ? new BroadcastChannel("cc_sync") : null;
+
+    /* =========================================================
+       DEFAULTS
+    ========================================================= */
+    const defaultProfile = { name:"", whatsapp:"", chatgpt:"" };
+    const defaultKpiSettings = {
+      convPerInc: 30,
+      euroPerInc: 2000,
+      targetEuro: 2000,
+      targetIncarichi: 1
+    };
+
+    /* =========================================================
+       GLOBAL STATE
+    ========================================================= */
+    let profile = loadProfile();
+    let kpiState = loadKpiState();
+    let cursor = new Date();
+
+    /* =========================================================
+       TOP UI
+    ========================================================= */
+    const hdrHello = document.getElementById("hdrHello");
+    const pillDate = document.getElementById("pillDate");
+    const pillMonth = document.getElementById("pillMonth");
+    const pillLeft = document.getElementById("pillLeft");
+    const pillRight = document.getElementById("pillRight");
+
+    document.getElementById("btnPrev").onclick = () => { cursor = addDays(cursor,-1); renderAll(); };
+    document.getElementById("btnToday").onclick = () => { cursor = new Date(); renderAll(); };
+    document.getElementById("btnNext").onclick = () => { cursor = addDays(cursor, 1); renderAll(); };
+
+    /* =========================================================
+       TABS
+    ========================================================= */
+    [...document.querySelectorAll(".tab")].forEach(t => {
+      t.addEventListener("click", () => {
+        [...document.querySelectorAll(".tab")].forEach(x => x.classList.remove("active"));
+        t.classList.add("active");
+        const id = t.getAttribute("data-tab");
+        [...document.querySelectorAll(".view")].forEach(v => v.classList.remove("active"));
+        document.getElementById(`view-${id}`).classList.add("active");
+        renderAll();
+      });
+    });
+
+    /* =========================================================
+       HOME / CONTROL CENTER
+    ========================================================= */
+    const inName = document.getElementById("inName");
+    const inWa = document.getElementById("inWa");
+    const inChatgpt = document.getElementById("inChatgpt");
+    const boxProfile = document.getElementById("boxProfile");
+
+    document.getElementById("btnSaveProfile").onclick = () => {
+      profile = {
+        name: (inName.value || "").trim(),
+        whatsapp: (inWa.value || "").trim(),
+        chatgpt: (inChatgpt.value || "").trim()
+      };
+      saveProfile(profile);
+      pingSync();
+      renderAll();
+    };
+
+    document.getElementById("btnOpenWa").onclick = () => {
+      const wa = (inWa.value || profile.whatsapp || "").trim();
+      if(!wa){ alert("Inserisci un numero WhatsApp (es. +39...)"); return; }
+      const only = wa.replace(/[^\d+]/g,"");
+      // apre chat WhatsApp (web/app a seconda del device)
+      window.open(`https://wa.me/${only.replace("+","")}`, "_blank");
+    };
+
+    document.getElementById("btnOpenChatgpt").onclick = () => {
+      const url = (inChatgpt.value || profile.chatgpt || "").trim();
+      if(!url){ alert("Inserisci un link ChatGPT (facoltativo)."); return; }
+      window.open(url, "_blank");
+    };
+
+    /* =========================================================
+       OGGI / CHECKLIST
+    ========================================================= */
+    const agendaTitle = document.getElementById("agendaTitle");
+    const agendaTag = document.getElementById("agendaTag");
+    const agendaLine1 = document.getElementById("agendaLine1");
+    const agendaLine2 = document.getElementById("agendaLine2");
+
+    const inContacts = document.getElementById("inContacts");
+    const inFollowups = document.getElementById("inFollowups");
+
+    const inConvPerInc = document.getElementById("inConvPerInc");
+    const inEuroPerInc = document.getElementById("inEuroPerInc");
+
+    const boxMonth = document.getElementById("boxMonth");
+    const boxFormula = document.getElementById("boxFormula");
+
+    document.getElementById("btnSaveDay").onclick = () => { saveDayFromInputs(); };
+    document.getElementById("btnVital").onclick = () => { vitalMode(); };
+
+    document.getElementById("btnSaveMoney").onclick = () => {
+      kpiState.settings.convPerInc = clampInt(num(inConvPerInc.value), 1, 9999);
+      kpiState.settings.euroPerInc = Math.max(0, num(inEuroPerInc.value));
+      persistKpi();
+      pingSync();
+      renderAll();
+    };
+
+    // toggles
+    [...document.querySelectorAll("#view-oggi .item[data-key]")].forEach(row => {
+      const key = row.getAttribute("data-key");
+      const toggle = row.querySelector(".toggle");
+      toggle.addEventListener("click", () => {
+        const day = getDay(cursor);
+        day[key] = !day[key];
+        setDay(cursor, day);
+        pingSync();
+        renderAll();
+      });
+      toggle.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" || e.key === " "){ e.preventDefault(); toggle.click(); }
+      });
+    });
+
+    [inContacts, inFollowups].forEach(el => {
+      el.addEventListener("change", () => {
+        const day = getDay(cursor);
+        day.contacts = num(inContacts.value);
+        day.followups = num(inFollowups.value);
+        setDay(cursor, day);
+        pingSync();
+        renderAll();
+      });
+    });
+
+    /* =========================================================
+       MANAGER
+    ========================================================= */
+    const mAgendaTitle = document.getElementById("mAgendaTitle");
+    const mAgendaTag = document.getElementById("mAgendaTag");
+    const mAgendaLine1 = document.getElementById("mAgendaLine1");
+    const mAgendaLine2 = document.getElementById("mAgendaLine2");
+
+    const kVideos = document.getElementById("kVideos");
+    const kContacts = document.getElementById("kContacts");
+    const kFollowups = document.getElementById("kFollowups");
+    const kConvs = document.getElementById("kConvs");
+    const kAppt = document.getElementById("kAppt");
+    const kWins = document.getElementById("kWins");
+
+    const barVideo = document.getElementById("barVideo");
+    const barConvs = document.getElementById("barConvs");
+    const barAppt = document.getElementById("barAppt");
+    const lblVideo = document.getElementById("lblVideo");
+    const lblConvs = document.getElementById("lblConvs");
+    const lblAppt = document.getElementById("lblAppt");
+
+    const boxAdvice = document.getElementById("boxAdvice");
+    const boxRevenue = document.getElementById("boxRevenue");
+
+    const mConvPerInc = document.getElementById("mConvPerInc");
+    const mEuroPerInc = document.getElementById("mEuroPerInc");
+    const mTargetEuro = document.getElementById("mTargetEuro");
+    const mTargetInc = document.getElementById("mTargetInc");
+
+    document.getElementById("btnSaveManagerSettings").onclick = () => {
+      kpiState.settings.convPerInc = clampInt(num(mConvPerInc.value), 1, 9999);
+      kpiState.settings.euroPerInc = Math.max(0, num(mEuroPerInc.value));
+      kpiState.settings.targetEuro = Math.max(0, num(mTargetEuro.value));
+      kpiState.settings.targetIncarichi = Math.max(0, num(mTargetInc.value));
+      persistKpi();
+      pingSync();
+      renderAll();
+    };
+
+    document.getElementById("btnResetAll").onclick = () => {
+      if(!confirm("Sei sicuro? Cancella PROFILO + KPI.")) return;
+      localStorage.removeItem(LS_PROFILE);
+      localStorage.removeItem(LS_KPI);
+      profile = loadProfile();
+      kpiState = loadKpiState();
+      pingSync();
+      renderAll();
+    };
+
+    /* =========================================================
+       SYNC (se apri più tab)
+    ========================================================= */
+    if(bc){
+      bc.onmessage = () => {
+        profile = loadProfile();
+        kpiState = loadKpiState();
+        renderAll();
+      };
+    }
+    window.addEventListener("storage", (e) => {
+      if(e.key === LS_PROFILE || e.key === LS_KPI){
+        profile = loadProfile();
+        kpiState = loadKpiState();
+        renderAll();
+      }
+    });
+
+    /* =========================================================
+       RENDER
+    ========================================================= */
+    hydrateInputs();
+    renderAll();
+
+    function renderAll(){
+      // header
+      pillDate.textContent = formatDate(cursor);
+      pillMonth.textContent = monthKey(cursor);
+      hdrHello.textContent = profile.name ? `Ciao ${profile.name}` : "Imposta il tuo nome in Home";
+
+      // HOME
+      inName.value = profile.name || "";
+      inWa.value = profile.whatsapp || "";
+      inChatgpt.value = profile.chatgpt || "";
+      boxProfile.textContent = [
+        "PROFILO SALVATO:",
+        `- Nome: ${profile.name || "—"}`,
+        `- WhatsApp: ${profile.whatsapp || "—"}`,
+        `- ChatGPT: ${profile.chatgpt || "—"}`
+      ].join("\n");
+
+      // Agenda (oggi + manager)
+      renderAgenda(cursor, agendaTitle, agendaTag, agendaLine1, agendaLine2);
+      renderAgenda(cursor, mAgendaTitle, mAgendaTag, mAgendaLine1, mAgendaLine2);
+
+      // OGGI view
+      const day = getDay(cursor);
+
+      // toggles
+      [...document.querySelectorAll("#view-oggi .item[data-key]")].forEach(row => {
+        const key = row.getAttribute("data-key");
+        const toggle = row.querySelector(".toggle");
+        const on = !!day[key];
+        toggle.classList.toggle("on", on);
+        toggle.setAttribute("aria-checked", on ? "true" : "false");
+      });
+
+      inContacts.value = day.contacts ?? 0;
+      inFollowups.value = day.followups ?? 0;
+
+      // money settings inputs (OGGI + MANAGER)
+      inConvPerInc.value = kpiState.settings.convPerInc;
+      inEuroPerInc.value = kpiState.settings.euroPerInc;
+
+      mConvPerInc.value = kpiState.settings.convPerInc;
+      mEuroPerInc.value = kpiState.settings.euroPerInc;
+      mTargetEuro.value = kpiState.settings.targetEuro;
+      mTargetInc.value = kpiState.settings.targetIncarichi;
+
+      // score & month aggregation
+      const score = dayScore(day);
+      const monthAgg = aggMonth(monthKey(cursor));
+
+      const incarichiEst = monthAgg.conversations / Math.max(1, kpiState.settings.convPerInc);
+      const euroEst = incarichiEst * kpiState.settings.euroPerInc;
+
+      pillLeft.textContent = `Stato: ${score}/6 oggi`;
+      pillRight.textContent = `€ stimati: ${euroFmt(Math.round(euroEst))}`;
+
+      boxMonth.textContent =
+        `NUMERI DEL MESE (${monthKey(cursor)})\n` +
+        `- Video: ${monthAgg.videos}\n` +
+        `- Contatti: ${monthAgg.contacts}\n` +
+        `- Richiami: ${monthAgg.followups}\n` +
+        `- Parlato (proprietari): ${monthAgg.conversations}\n` +
+        `- Prossimi passi: ${monthAgg.appointments}\n`;
+
+      boxFormula.textContent =
+        `CALCOLO SOLDI (stima)\n` +
+        `Parlato / ${kpiState.settings.convPerInc} × ${euroFmt(kpiState.settings.euroPerInc)}\n` +
+        `= circa ${euroFmt(Math.round(euroEst))}`;
+
+      // MANAGER view
+      kVideos.textContent = monthAgg.videos;
+      kContacts.textContent = monthAgg.contacts;
+      kFollowups.textContent = monthAgg.followups;
+      kConvs.textContent = monthAgg.conversations;
+      kAppt.textContent = monthAgg.appointments;
+
+      const mModel = getMonthModel(monthKey(cursor));
+      kWins.textContent = `${mModel.wins}/${mModel.daysCount}`;
+
+      const tVideo = 25, tConvs = 25, tAppt = 7;
+      setBar(barVideo, monthAgg.videos, tVideo, lblVideo, "video");
+      setBar(barConvs, monthAgg.conversations, tConvs, lblConvs, "parlato");
+      setBar(barAppt,  monthAgg.appointments, tAppt,  lblAppt,  "prossimi passi");
+
+      const status = computeStatus(mModel, cursor, kpiState.settings);
+      boxAdvice.textContent = status.advice.join("\n");
+
+      renderRevenueNeeds(mModel, kpiState.settings, boxRevenue);
+    }
+
+    function hydrateInputs(){
+      // nothing special: renderAll does it
+    }
+
+    /* =========================================================
+       AGENDA
+    ========================================================= */
+    function renderAgenda(date, tEl, tagEl, l1El, l2El){
+      const dow = new Date(date).getDay();
+      const a = [
+        { day:"Domenica", title:"Riposo", line1:"Recupera energie", line2:"15 min: pianifica (se vuoi)", focus:"energia" },
+        { day:"Lunedì", title:"Riparto", line1:"1 video semplice", line2:"Richiami ai contatti vecchi", focus:"ripartire" },
+        { day:"Martedì", title:"Visibilità", line1:"1 video: errore comune", line2:"Contatti nuovi + richiami", focus:"farti vedere" },
+        { day:"Mercoledì", title:"Appuntamenti", line1:"1 video: esempio reale", line2:"Fissa date/ore (prossimo passo)", focus:"convertire" },
+        { day:"Giovedì", title:"Fiducia", line1:"1 video: come lavori", line2:"Richiami dopo appuntamenti", focus:"fiducia" },
+        { day:"Venerdì", title:"Ordine", line1:"1 video leggero", line2:"Numeri + piano", focus:"ordine" },
+        { day:"Sabato", title:"Extra", line1:"Zona / appuntamenti", line2:"Recupera trattative", focus:"spinta" },
+      ][dow];
+
+      tEl.textContent = `🗓️ ${a.day} – ${a.title}`;
+      tagEl.textContent = `🎯 Focus: ${a.focus}`;
+      l1El.innerHTML = `<span>🎥</span> ${a.line1}`;
+      l2El.innerHTML = `<span>📞</span> ${a.line2}`;
+    }
+
+    /* =========================================================
+       CHECKLIST ACTIONS
+    ========================================================= */
+    function saveDayFromInputs(){
+      const day = getDay(cursor);
+      day.contacts = num(inContacts.value);
+      day.followups = num(inFollowups.value);
+      setDay(cursor, day);
+      persistKpi();
+      pingSync();
+      renderAll();
+    }
+
+    function vitalMode(){
+      const day = getDay(cursor);
+      day.video_done = true;                   // 1 video
+      day.followups = Math.max(num(day.followups), 5); // almeno 5 richiami
+      day.kpi_updated = true;                  // ho segnato oggi
+      setDay(cursor, day);
+      persistKpi();
+      pingSync();
+      renderAll();
+    }
+
+    /* =========================================================
+       KPI LOGIC
+    ========================================================= */
+    function dayScore(day){
+      let s = 0;
+      if(day.video_done) s++;
+      if(num(day.contacts) >= 5) s++;
+      if(num(day.followups) >= 10) s++;
+      if(day.conversation_done) s++;
+      if(day.appointment_done) s++;
+      if(day.kpi_updated) s++;
+      return s;
+    }
+
+    function getMonthModel(mKey){
+      const monthDays = kpiState.months[mKey] || {};
+      let videos=0, contacts=0, followups=0, conversations=0, appointments=0, wins=0, daysCount=0;
+      for(const dayKey in monthDays){
+        const d = monthDays[dayKey];
+        daysCount++;
+        if(d.video_done) videos++;
+        contacts += num(d.contacts);
+        followups += num(d.followups);
+        if(d.conversation_done) conversations++;
+        if(d.appointment_done) appointments++;
+        if(dayScore(d) >= 4) wins++;
+      }
+      return { videos, contacts, followups, conversations, appointments, wins, daysCount };
+    }
+
+    function aggMonth(m){
+      const days = kpiState.months[m] || {};
+      let videos=0, contacts=0, followups=0, conversations=0, appointments=0;
+      for(const dk in days){
+        const d = days[dk];
+        if(d.video_done) videos++;
+        contacts += num(d.contacts);
+        followups += num(d.followups);
+        if(d.conversation_done) conversations++;
+        if(d.appointment_done) appointments++;
+      }
+      return { videos, contacts, followups, conversations, appointments };
+    }
+
+    function computeStatus(month, date, s){
+      const dim = daysInMonth(date);
+      const day = new Date(date).getDate();
+      const mid = { v:25, c:25, a:7 };
+
+      const expV = Math.floor(mid.v * (day/dim));
+      const expC = Math.floor(mid.c * (day/dim));
+      const expA = Math.floor(mid.a * (day/dim));
+
+      const okV = month.videos >= Math.max(1, expV);
+      const okC = month.conversations >= Math.max(1, expC);
+      const okA = month.appointments >= Math.max(0, expA);
+
+      let label = "OK";
+      const advice = [];
+
+      if(!okV && !okC){
+        label = "Serve fare le basi";
+        advice.push("Fai: 1 video + 10 richiami al giorno.");
+      } else if(okV && !okC){
+        label = "Serve parlare di più";
+        advice.push("Stai facendo contenuti, ma pochi contatti: aumenta richiami/contatti.");
+      } else if(okC && !okA){
+        label = "Serve fissare date/ore";
+        advice.push("Ogni conversazione deve finire con un prossimo passo.");
+      } else {
+        advice.push("Continua così. Non cambiare sistema.");
+      }
+
+      const incarichiEst = month.conversations / Math.max(1, s.convPerInc);
+      const euroEst = incarichiEst * s.euroPerInc;
+      advice.push(`Pipeline: ~${round2(incarichiEst)} incarichi • ${euroFmt(Math.round(euroEst))}`);
+
+      return { label, advice };
+    }
+
+    function renderRevenueNeeds(month, s, outEl){
+      const targetEuro = s.targetEuro;
+      const targetInc = s.targetIncarichi;
+
+      const needIncByEuro = s.euroPerInc > 0 ? (targetEuro / s.euroPerInc) : 0;
+      const needInc = Math.max(targetInc, needIncByEuro);
+
+      const needConvs = Math.ceil(needInc * s.convPerInc);
+      const apptPerInc = 3;
+      const needAppt = Math.ceil(needInc * apptPerInc);
+
+      const leftConvs = Math.max(0, needConvs - month.conversations);
+      const leftAppt  = Math.max(0, needAppt - month.appointments);
+
+      const incarichiEst = month.conversations / Math.max(1, s.convPerInc);
+      const euroEst = incarichiEst * s.euroPerInc;
+
+      outEl.textContent = [
+        `Stima soldi: (parlato / ${s.convPerInc}) × ${euroFmt(s.euroPerInc)}`,
+        `Target mese: ${euroFmt(targetEuro)} | incarichi target: ${targetInc}`,
+        `Per arrivarci (stima):`,
+        `- Parlato necessario: ${needConvs} (mancano ${leftConvs})`,
+        `- Prossimi passi necessari: ${needAppt} (mancano ${leftAppt})`,
+        `Pipeline attuale: ~${round2(incarichiEst)} incarichi • ${euroFmt(Math.round(euroEst))}`
+      ].join("\n");
+    }
+
+    function setBar(el, v, target, lbl, unit){
+      const pct = clamp(Math.round((v / Math.max(1,target)) * 100), 0, 140);
+      el.style.width = `${Math.min(pct,100)}%`;
+      lbl.textContent = `${v} / ${target} ${unit} (${pct}%)`;
+    }
+
+    /* =========================================================
+       DATA MODEL (KPI)
+    ========================================================= */
+    function getDay(date){
+      const m = monthKey(date);
+      const k = dayKey(date);
+      if(!kpiState.months[m]) kpiState.months[m] = {};
+      if(!kpiState.months[m][k]){
+        kpiState.months[m][k] = {
+          video_done:false,
+          contacts:0,
+          followups:0,
+          conversation_done:false,
+          appointment_done:false,
+          kpi_updated:false
+        };
+      }
+      return kpiState.months[m][k];
+    }
+
+    function setDay(date, day){
+      const m = monthKey(date);
+      const k = dayKey(date);
+      if(!kpiState.months[m]) kpiState.months[m] = {};
+      kpiState.months[m][k] = day;
+      persistKpi();
+    }
+
+    /* =========================================================
+       STORAGE: PROFILE
+    ========================================================= */
+    function loadProfile(){
+      try{
+        const raw = localStorage.getItem(LS_PROFILE);
+        if(!raw) return {...defaultProfile};
+        const p = JSON.parse(raw);
+        return {
+          name: (p.name || "").trim(),
+          whatsapp: (p.whatsapp || "").trim(),
+          chatgpt: (p.chatgpt || "").trim()
+        };
+      }catch{
+        return {...defaultProfile};
+      }
+    }
+    function saveProfile(p){
+      localStorage.setItem(LS_PROFILE, JSON.stringify(p));
+    }
+
+    /* =========================================================
+       STORAGE: KPI
+    ========================================================= */
+    function loadKpiState(){
+      try{
+        const raw = localStorage.getItem(LS_KPI);
+        if(!raw){
+          return { months:{}, settings:{...defaultKpiSettings} };
+        }
+        const s = JSON.parse(raw);
+        if(!s.months) s.months = {};
+        if(!s.settings) s.settings = {...defaultKpiSettings};
+        // migrazione chiavi (se arrivi da vecchie versioni)
+        if(typeof s.settings.convPerIncarico === "number" && typeof s.settings.convPerInc !== "number"){
+          s.settings.convPerInc = s.settings.convPerIncarico;
+        }
+        if(typeof s.settings.euroPerIncarico === "number" && typeof s.settings.euroPerInc !== "number"){
+          s.settings.euroPerInc = s.settings.euroPerIncarico;
+        }
+        if(typeof s.settings.targetIncarichi !== "number") s.settings.targetIncarichi = defaultKpiSettings.targetIncarichi;
+        if(typeof s.settings.targetEuro !== "number") s.settings.targetEuro = defaultKpiSettings.targetEuro;
+        if(typeof s.settings.convPerInc !== "number") s.settings.convPerInc = defaultKpiSettings.convPerInc;
+        if(typeof s.settings.euroPerInc !== "number") s.settings.euroPerInc = defaultKpiSettings.euroPerInc;
+        return s;
+      }catch{
+        return { months:{}, settings:{...defaultKpiSettings} };
+      }
+    }
+    function persistKpi(){
+      localStorage.setItem(LS_KPI, JSON.stringify(kpiState));
+    }
+
+    function pingSync(){
+      if(bc) bc.postMessage({ t:Date.now() });
+    }
+
+    /* =========================================================
+       HELPERS
+    ========================================================= */
+    function dayKey(d){
+      const x = new Date(d);
+      const yyyy = x.getFullYear();
+      const mm = String(x.getMonth()+1).padStart(2,"0");
+      const dd = String(x.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function monthKey(d){
+      const x = new Date(d);
+      const yyyy = x.getFullYear();
+      const mm = String(x.getMonth()+1).padStart(2,"0");
+      return `${yyyy}-${mm}`;
+    }
+    function formatDate(d){
+      return new Date(d).toLocaleDateString("it-IT", { weekday:"short", year:"numeric", month:"short", day:"2-digit" });
+    }
+    function addDays(d, n){
+      const x = new Date(d);
+      x.setDate(x.getDate()+n);
+      return x;
+    }
+    function daysInMonth(d){
+      const x = new Date(d);
+      const y = x.getFullYear(), m = x.getMonth();
+      return new Date(y, m+1, 0).getDate();
+    }
+    function num(v){
+      const x = Number(v);
+      return Number.isFinite(x) ? x : 0;
+    }
+    function clampInt(v, min, max){
+      v = Math.round(num(v));
+      return Math.min(max, Math.max(min, v));
+    }
+    function clamp(x,a,b){ return Math.min(b, Math.max(a, x)); }
+    function round2(x){ return Math.round(x*100)/100; }
+    function euroFmt(v){
+      try{ return new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"}).format(v); }
+      catch{ return `€${v}`; }
+    }
+  </script>
+</body>
+</html>
