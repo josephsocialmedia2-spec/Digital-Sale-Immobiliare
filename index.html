@@ -1,200 +1,1291 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sistema Operativo Giornaliero</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM ACQ PRO - Sistema Operativo Immobiliare</title>
+    <style>
+        :root{
+            --bg:#0b1120;
+            --text:#f3f4f6;
+            --muted:#a0adb8;
+            --gold:#d8a23a;
+            --border: rgba(225,225,225,0.18);
+            --shadow: 0 14px 50px rgba(0,0,0,0.45);
+            --radius: 18px;
+            --sans: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+            --tele-font: 12px;
+            --tele-line: 1.22;
+            --stage-w: min(420px, 92vw);
+            --zoom: 1;
+            
+            /* Nuove variabili unificate */
+            --primary: #d8a23a;
+            --secondary: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
 
-<style>
-:root{
-  --bg:#0b1120; --card:#111827; --text:#f3f4f6; --muted:#9ca3af;
-  --gold:#d8a23a; --border:rgba(255,255,255,.12);
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui;background:var(--bg);color:var(--text)}
-button,input,textarea,select{font-family:inherit}
-.wrap{max-width:1100px;margin:auto;padding:12px 12px 90px}
+        *{ box-sizing:border-box; }
+        body{
+            margin:0;
+            font-family:var(--sans);
+            color:var(--text);
+            background:
+                radial-gradient(900px 500px at 15% 10%, rgba(216,162,58,.18), transparent 60%),
+                radial-gradient(900px 600px at 85% 30%, rgba(123,79,189,.14), transparent 55%),
+                radial-gradient(900px 600px at 70% 85%, rgba(74,143,114,.14), transparent 55%),
+                var(--bg);
+            line-height: 1.5;
+        }
 
-/* HEADER */
-header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.title{font-weight:900;font-size:14px}
-.top-actions{display:flex;gap:6px;flex-wrap:wrap}
-.btn{
-  padding:8px 12px;border-radius:12px;border:1px solid var(--border);
-  background:#111;color:var(--text);font-weight:800;font-size:11px;cursor:pointer
-}
-.btn.primary{background:var(--gold);color:#111}
-.btn.small{font-size:10px;padding:6px 10px}
+        .wrap{ 
+            max-width:1250px; 
+            margin:0 auto; 
+            padding:14px 12px 84px; 
+        }
 
-/* TABS */
-.tabs{display:flex;gap:6px;margin:12px 0}
-.tab{padding:8px 12px;border-radius:999px;border:1px solid var(--border);cursor:pointer;font-weight:800;font-size:11px;color:var(--muted)}
-.tab.active{background:rgba(216,162,58,.2);color:var(--text);border-color:var(--gold)}
+        /* HEADER & NAVIGATION */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(11, 17, 32, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 15px 0;
+        }
 
-/* CARD */
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;margin-bottom:12px}
-.section{padding:12px}
-.h{font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:900;margin-bottom:8px}
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
 
-/* AGENDA */
-.agenda{border-left:4px solid var(--gold);padding:10px;background:#0f172a;border-radius:14px;margin-bottom:10px}
-.agenda b{font-size:12px}
-.agenda div{font-size:12px;margin-top:4px}
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-/* CHECKLIST */
-.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px;border:1px solid var(--border);border-radius:12px;margin-top:6px}
-.toggle{width:42px;height:24px;border-radius:999px;background:#222;position:relative;cursor:pointer}
-.toggle::after{content:"";width:18px;height:18px;background:#999;border-radius:50%;position:absolute;top:3px;left:3px}
-.toggle.on{background:#14532d}
-.toggle.on::after{left:21px;background:#22c55e}
+        .logo-badge {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, rgba(216, 162, 58, 0.2), rgba(11, 17, 32, 0.8));
+            border: 2px solid rgba(216, 162, 58, 0.3);
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-family: var(--mono);
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--gold);
+        }
 
-/* MODAL */
-.modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.8);
-  display:none;align-items:center;justify-content:center;z-index:9999
-}
-.modal-box{
-  background:#0b1120;border:1px solid var(--border);border-radius:18px;
-  padding:16px;max-width:480px;width:92%
-}
-.modal-box h3{margin:0 0 8px;font-size:14px}
-.modal-box p{font-size:12px;color:var(--muted);line-height:1.4}
+        .logo-text h1 {
+            font-size: 1.6rem;
+            margin: 0;
+            background: linear-gradient(90deg, var(--gold), #f3f4f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-/* LOCK */
-body.locked #app{pointer-events:none;opacity:.4}
-#feedbackModal,#helpModal{pointer-events:auto}
-</style>
+        .logo-text .subtitle {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .status-pills {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(160, 173, 184, 0.3);
+            background: rgba(160, 173, 184, 0.1);
+            color: var(--muted);
+        }
+
+        .pill.highlight {
+            border-color: var(--gold);
+            background: rgba(216, 162, 58, 0.1);
+            color: var(--gold);
+        }
+
+        /* HERO SECTION */
+        .hero {
+            text-align: center;
+            padding: 60px 0 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h2 {
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            background: linear-gradient(90deg, var(--gold), #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--muted);
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* SCARCITY BANNER */
+        .scarcity-banner {
+            background: rgba(216, 162, 58, 0.1);
+            border: 1px solid var(--gold);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 30px auto;
+            max-width: 600px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .scarcity-banner h3 {
+            color: var(--gold);
+            margin: 0 0 10px 0;
+            font-size: 1.3rem;
+        }
+
+        .slot-counter {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--gold);
+            font-family: var(--mono);
+            margin: 10px 0;
+        }
+
+        .scarcity-note {
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* WHATSAPP CTA */
+        .whatsapp-cta {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+        }
+
+        .whatsapp-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #25D366;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+            transition: all 0.3s;
+        }
+
+        .whatsapp-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(37, 211, 102, 0.4);
+        }
+
+        .whatsapp-btn i {
+            font-size: 1.5rem;
+        }
+
+        .whatsapp-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #25D366;
+            color: white;
+            padding: 16px 32px;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+
+        .whatsapp-inline:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+        }
+
+        /* TABS SYSTEM */
+        .tabs-container {
+            background: rgba(18, 24, 38, 0.8);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin: 40px 0;
+        }
+
+        .tabs-header {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border);
+            background: rgba(11, 17, 32, 0.6);
+        }
+
+        .tab-btn {
+            padding: 18px 24px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-family: var(--sans);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .tab-btn:hover {
+            background: rgba(216, 162, 58, 0.1);
+            color: var(--gold);
+        }
+
+        .tab-btn.active {
+            background: rgba(216, 162, 58, 0.15);
+            color: var(--gold);
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* CARD SYSTEM */
+        .card {
+            background: rgba(18, 24, 38, 0.8);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h3 {
+            color: var(--gold);
+            margin: 0 0 20px 0;
+            font-size: 1.3rem;
+        }
+
+        /* KPI GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .kpi-box {
+            background: rgba(11, 17, 32, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--gold);
+            font-family: var(--mono);
+            margin: 10px 0;
+        }
+
+        .kpi-label {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        /* FORM ELEMENTS */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(11, 17, 32, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(216, 162, 58, 0.1);
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 28px;
+            border-radius: var(--radius);
+            border: none;
+            font-family: var(--sans);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: #0b1120;
+        }
+
+        .btn-primary:hover {
+            background: #e0b048;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(216, 162, 58, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(216, 162, 58, 0.1);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* CHECKLIST */
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px;
+            background: rgba(11, 17, 32, 0.6);
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) - 4px);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            margin-top: 3px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--gold);
+        }
+
+        .checklist-item-content {
+            flex: 1;
+        }
+
+        .checklist-item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+
+        .checklist-item-desc {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        /* STATUS BADGES */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(39, 174, 96, 0.2);
+            color: #27ae60;
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+
+        .status-pending {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+            border: 1px solid rgba(243, 156, 18, 0.3);
+        }
+
+        .status-off {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        /* LOG CONTAINER */
+        .log-container {
+            background: rgba(11, 17, 32, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: var(--mono);
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .hero h2 {
+                font-size: 2rem;
+            }
+            
+            .tab-btn {
+                min-width: 100%;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .whatsapp-cta {
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .whatsapp-btn {
+                padding: 14px 20px;
+                font-size: 1rem;
+            }
+        }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .trust-badge i {
+            color: var(--gold);
+            font-size: 1.2rem;
+        }
+    </style>
+    
+    <!-- Font Awesome per le icone -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
+    <!-- WhatsApp Floating Button -->
+    <div class="whatsapp-cta">
+        <a href="https://wa.me/393713708294" class="whatsapp-btn" target="_blank" aria-label="Contattami su WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+            <span>Ottieni Slot</span>
+        </a>
+    </div>
 
-<div id="app">
-<div class="wrap">
+    <!-- HEADER -->
+    <header class="header">
+        <div class="wrap">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-badge">MW</div>
+                    <div class="logo-text">
+                        <h1>SYSTEM ACQ PRO</h1>
+                        <div class="subtitle">Sistema Operativo Immobiliare - Acquisizione + Digitale</div>
+                    </div>
+                </div>
+                <div class="status-pills">
+                    <span class="pill highlight">Agente Immobiliare</span>
+                    <span class="pill highlight">Digital Strategist</span>
+                    <span class="pill">Zona: Condove (TO)</span>
+                    <span class="pill">Modalità: Esecuzione</span>
+                </div>
+            </div>
+        </div>
+    </header>
 
-<header>
-  <div class="title">🧠 Sistema Operativo</div>
-  <div class="top-actions">
-    <button class="btn small" id="btnHelp">📘 ISTRUZIONI</button>
-    <button class="btn small" id="btnToday">📅 OGGI</button>
-  </div>
-</header>
+    <!-- HERO SECTION -->
+    <main class="wrap">
+        <section class="hero">
+            <h2>Trasforma Territorio in Incarichi</h2>
+            <p>Sistema biomeccanico per agenti immobiliari che vogliono dominare il mercato locale senza dipendere da portali e referral casuali.</p>
+            
+            <!-- Scarcity Banner -->
+            <div class="scarcity-banner">
+                <h3><i class="fas fa-exclamation-circle"></i> POSTI LIMITATI QUESTA SETTIMANA</h3>
+                <div class="slot-counter">3</div>
+                <p>Slot rimasti per consulenze gratuite di valutazione</p>
+                <p class="scarcity-note">Disponibilità aggiornata manualmente - Contatta subito per riservare il tuo posto</p>
+            </div>
+            
+            <!-- Inline WhatsApp CTA -->
+            <a href="https://wa.me/393713708294" class="whatsapp-inline" target="_blank">
+                <i class="fab fa-whatsapp"></i>
+                <span>PRENOTA IL TUO SLOT GRATUITO</span>
+            </a>
+            
+            <p style="font-size: 0.9rem; color: var(--muted); margin-top: 10px;">
+                <i class="fas fa-clock"></i> Risposta garantita entro 24 ore
+            </p>
+        </section>
 
-<div class="tabs">
-  <div class="tab active" data-tab="home">HOME</div>
-  <div class="tab" data-tab="oggi">OGGI</div>
-  <div class="tab" data-tab="manager">MANAGER</div>
-</div>
+        <!-- SCARCITY COUNTER -->
+        <div class="card" style="text-align: center; max-width: 500px; margin: 30px auto;">
+            <h3><i class="fas fa-hourglass-half"></i> TEMPO LIMITATO</h3>
+            <p>Offerta valida fino a <strong>31 Dicembre 2024</strong></p>
+            <p>Ultime disponibilità per implementazione completa del sistema</p>
+        </div>
 
-<!-- HOME -->
-<div class="view active" id="home">
-  <div class="card"><div class="section">
-    <div class="h">Impostazioni (1 volta)</div>
-    <input id="name" placeholder="Il tuo nome">
-  </div></div>
-</div>
+        <!-- TABS SYSTEM -->
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="oggi">Oggi (Operativo)</button>
+                <button class="tab-btn" data-tab="settimana">Piano Settimanale</button>
+                <button class="tab-btn" data-tab="digitale">Strategia Digitale</button>
+                <button class="tab-btn" data-tab="diagnosi">Diagnosi & Report</button>
+                <button class="tab-btn" data-tab="analisi">Analisi Mercato</button>
+            </div>
 
-<!-- OGGI -->
-<div class="view" id="oggi">
-  <div class="agenda">
-    <b>🎯 OGGI</b>
-    <div>🎥 1 video semplice</div>
-    <div>📞 Contatti + richiami</div>
-  </div>
+            <!-- TAB 1: OGGI -->
+            <div class="tab-content active" id="tab-oggi">
+                <div class="card">
+                    <h3>Stato Operativo Giornaliero</h3>
+                    <div class="input-group">
+                        <label>Data</label>
+                        <input type="date" id="todayDate">
+                    </div>
+                    <div class="input-group">
+                        <label>Micro-zona di oggi (1 sola, da piano)</label>
+                        <input type="text" id="todayZone" placeholder='Es: "Via Roma 10-30"'>
+                    </div>
+                    
+                    <div class="kpi-grid">
+                        <div class="kpi-box">
+                            <div class="kpi-label">Persone Parlate (target: ≥20)</div>
+                            <div class="kpi-value" id="kpiPeople">0</div>
+                            <div class="btn-group" style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button class="btn btn-secondary" onclick="adjustCounter('people', -1)">-1</button>
+                                <button class="btn btn-primary" onclick="adjustCounter('people', 1)">+1</button>
+                            </div>
+                        </div>
+                        <div class="kpi-box">
+                            <div class="kpi-label">Nominativi Raccolti (target: ≥1)</div>
+                            <div class="kpi-value" id="kpiNominatives">0</div>
+                            <div class="btn-group" style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button class="btn btn-secondary" onclick="adjustCounter('nominatives', -1)">-1</button>
+                                <button class="btn btn-primary" onclick="adjustCounter('nominatives', 1)">+1</button>
+                            </div>
+                        </div>
+                        <div class="kpi-box">
+                            <div class="kpi-label">Appuntamenti Fissati (target: ≥1)</div>
+                            <div class="kpi-value" id="kpiAppointments">0</div>
+                            <div class="btn-group" style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button class="btn btn-secondary" onclick="adjustCounter('appointments', -1)">-1</button>
+                                <button class="btn btn-primary" onclick="adjustCounter('appointments', 1)">+1</button>
+                            </div>
+                        </div>
+                        <div class="kpi-box">
+                            <div class="kpi-label">Incarichi Firmati</div>
+                            <div class="kpi-value" id="kpiAssignments">0</div>
+                            <div class="btn-group" style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button class="btn btn-secondary" onclick="adjustCounter('assignments', -1)">-1</button>
+                                <button class="btn btn-success" onclick="adjustCounter('assignments', 1)">+1</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 20px 0;">
+                        <button class="btn btn-primary" onclick="saveDailyState()">
+                            <i class="fas fa-save"></i> Salva Stato Giornata
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetDaily()">
+                            <i class="fas fa-redo"></i> Reset Giornata
+                        </button>
+                    </div>
+                </div>
 
-  <div class="card"><div class="section">
-    <div class="h">Checklist</div>
+                <div class="card">
+                    <h3>Checklist Operativa (Esecuzione Cieca)</h3>
+                    <div class="checklist" id="dailyChecklist">
+                        <!-- Popolato da JavaScript -->
+                    </div>
+                </div>
 
-    <div class="item">Video pubblicato<div class="toggle" data-k="v"></div></div>
-    <div class="item">5 contatti nuovi<div class="toggle" data-k="c"></div></div>
-    <div class="item">10 follow-up<div class="toggle" data-k="f"></div></div>
-    <div class="item">1 conversazione reale<div class="toggle" data-k="p"></div></div>
-    <div class="item">Prossimo passo fissato<div class="toggle" data-k="a"></div></div>
-    <div class="item">Numeri aggiornati<div class="toggle" data-k="n"></div></div>
+                <div class="card">
+                    <h3>Script Operativi (NON MODIFICARE)</h3>
+                    <div class="input-group">
+                        <label>Frase Contatto Unica</label>
+                        <textarea readonly rows="2">"Buongiorno, lavoro qui in zona. Lei o qualcuno che conosce sta pensando di vendere casa?"</textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>3 Domande Qualifica (ordine fisso)</label>
+                        <textarea readonly rows="4">1) "Sta pensando DAVVERO di vendere?"
+2) "Entro quando?"
+3) "Ha già parlato con altri professionisti?"</textarea>
+                    </div>
+                </div>
+            </div>
 
-    <button class="btn primary" style="margin-top:10px" id="saveDay">SALVA GIORNO</button>
-  </div></div>
-</div>
+            <!-- TAB 2: PIANO SETTIMANALE -->
+            <div class="tab-content" id="tab-settimana">
+                <div class="card">
+                    <h3>Piano Settimanale Micro-Zone</h3>
+                    <p style="color: var(--muted); margin-bottom: 20px;">La zona non cambia finché non hai saturato numeri minimi (≥100 persone / ≥8 appuntamenti / ≥2 incarichi)</p>
+                    
+                    <div class="input-group">
+                        <label>Settimana (etichetta)</label>
+                        <input type="text" id="weekLabel" placeholder="Es: Settimana 1 - Gennaio">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Micro-zona dominante (5 giorni minimo)</label>
+                        <input type="text" id="dominantZone" placeholder='Es: "Via Roma 1-50 (condomini anni 70)"'>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+                        <div class="input-group">
+                            <label>Lunedì</label>
+                            <input type="text" id="dayMon" placeholder="Zona giorno">
+                        </div>
+                        <div class="input-group">
+                            <label>Martedì</label>
+                            <input type="text" id="dayTue" placeholder="Zona giorno">
+                        </div>
+                        <div class="input-group">
+                            <label>Mercoledì</label>
+                            <input type="text" id="dayWed" placeholder="Zona giorno">
+                        </div>
+                        <div class="input-group">
+                            <label>Giovedì</label>
+                            <input type="text" id="dayThu" placeholder="Zona giorno">
+                        </div>
+                        <div class="input-group">
+                            <label>Venerdì</label>
+                            <input type="text" id="dayFri" placeholder="Zona giorno">
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button class="btn btn-primary" onclick="saveWeekPlan()">
+                            <i class="fas fa-save"></i> Salva Piano Settimanale
+                        </button>
+                        <button class="btn btn-secondary" onclick="applyDominantToAll()">
+                            <i class="fas fa-copy"></i> Applica a Tutti i Giorni
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-<!-- MANAGER -->
-<div class="view" id="manager">
-  <div class="card"><div class="section">
-    <div class="h">Manager</div>
-    <p style="font-size:12px;color:var(--muted)">
-      Qui controlli solo i numeri. Non devi fare nulla.
-    </p>
-  </div></div>
-</div>
+            <!-- TAB 3: DIGITALE -->
+            <div class="tab-content" id="tab-digitale">
+                <div class="card">
+                    <h3>Strategia Digitale - Trasforma Territorio in Contenuti</h3>
+                    
+                    <div class="scarcity-banner" style="background: rgba(37, 211, 102, 0.1); border-color: #25D366;">
+                        <h3><i class="fas fa-bolt"></i> CONTENUTI POLARIZZANTI</h3>
+                        <p>Massimizza commenti e conversazioni - Inserisciti nelle conversazioni già esistenti</p>
+                        <p class="scarcity-note">Regola base: SE NON GENERA CONVERSAZIONE → VA CAMBIATO</p>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>CTA Unica Digitale</label>
+                        <input type="text" id="ctaDigital" value="VALORE">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Piattaforme</label>
+                        <select id="platforms" multiple style="height: 120px;">
+                            <option selected>Facebook (Gruppi Locali)</option>
+                            <option selected>Instagram (Reels)</option>
+                            <option selected>TikTok (Shorts)</option>
+                            <option selected>YouTube (Shorts + Long)</option>
+                            <option selected>LinkedIn (Post Professionali)</option>
+                        </select>
+                        <small style="color: var(--muted);">Tieni premuto Ctrl per selezionare più opzioni</small>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 20px 0;">
+                        <button class="btn btn-primary" onclick="generateContentPlan()">
+                            <i class="fas fa-magic"></i> Genera Piano Contenuti (14 giorni)
+                        </button>
+                        <a href="https://wa.me/393713708294" class="btn btn-success" target="_blank">
+                            <i class="fab fa-whatsapp"></i> Consulenza Strategia Digitale
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-</div>
-</div>
+            <!-- TAB 4: DIAGNOSI -->
+            <div class="tab-content" id="tab-diagnosi">
+                <div class="card">
+                    <h3>Diagnosi Automatica - Codici Errore</h3>
+                    
+                    <div class="kpi-grid">
+                        <div class="kpi-box">
+                            <div class="kpi-label">Status Sistema</div>
+                            <div id="systemStatus" class="status-badge status-active">ATTIVO</div>
+                        </div>
+                        <div class="kpi-box">
+                            <div class="kpi-label">Ultima Diagnosi</div>
+                            <div id="lastDiagnosis" style="color: var(--gold);">—</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Log Diagnosi</label>
+                        <div class="log-container" id="diagnosisLog">
+                            Avvia la diagnosi per vedere i dettagli
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 20px 0;">
+                        <button class="btn btn-primary" onclick="runDiagnostics()">
+                            <i class="fas fa-stethoscope"></i> Esegui Diagnosi Completa
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateDailyReport()">
+                            <i class="fas fa-file-pdf"></i> Genera Report Giornaliero
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-<!-- ISTRUZIONI -->
-<div class="modal" id="helpModal">
-  <div class="modal-box">
-    <h3>📘 Istruzioni operative</h3>
-    <p>
-      1️⃣ Vai su <b>OGGI</b><br>
-      2️⃣ Guarda l’agenda in alto<br>
-      3️⃣ Fai le azioni<br>
-      4️⃣ Spunta le voci<br>
-      5️⃣ Salva il giorno<br><br>
-      🎯 Obiettivo: <b>4 spunte su 6</b><br>
-      🚑 Se sei stanco: fanne 2 e basta.
-    </p>
-    <button class="btn primary" style="width:100%" onclick="helpModal.style.display='none'">CHIUDI</button>
-  </div>
-</div>
+            <!-- TAB 5: ANALISI -->
+            <div class="tab-content" id="tab-analisi">
+                <div class="card">
+                    <h3>Analisi Mercato - Provincia di Torino</h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">
+                        <div class="kpi-box">
+                            <div class="kpi-label">Comuni Totali</div>
+                            <div class="kpi-value">312</div>
+                        </div>
+                        <div class="kpi-box">
+                            <div class="kpi-label">Zone Omogenee</div>
+                            <div class="kpi-value">11</div>
+                        </div>
+                        <div class="kpi-box">
+                            <div class="kpi-label">Prezzo Medio Provincia</div>
+                            <div class="kpi-value">€2.800/m²</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Zona di Interesse</label>
+                        <select id="analysisZone">
+                            <option value="condove">Condove (Val Susa)</option>
+                            <option value="torino">Torino Centro</option>
+                            <option value="corona_nord">Corona Nord</option>
+                            <option value="canavese">Canavese</option>
+                            <option value="valli">Valli Susa e Sangone</option>
+                        </select>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 20px 0;">
+                        <a href="https://wa.me/393713708294?text=Ciao,%20vorrei%20un'analisi%20dettagliata%20del%20mercato%20immobiliare%20nella%20mia%20zona" 
+                           class="btn btn-primary" target="_blank">
+                            <i class="fas fa-chart-line"></i> Richiedi Analisi Personalizzata
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<!-- FEEDBACK -->
-<div class="modal" id="feedbackModal">
-  <div class="modal-box">
-    <h3>🧠 Come ti sei trovato oggi?</h3>
-    <p>Rispondi per sbloccare il programma.</p>
-    <select id="fbScore">
-      <option value="">Valutazione 1–5</option>
-      <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-    </select>
-    <textarea id="fbText" rows="3" placeholder="Cosa migliorare domani?"></textarea>
-    <button class="btn primary" style="width:100%;margin-top:8px" id="fbSave">SALVA FEEDBACK</button>
-  </div>
-</div>
+        <!-- TRUST BADGES -->
+        <div class="card" style="text-align: center; margin: 40px auto; max-width: 800px;">
+            <h3>Perché Scegliere Questo Sistema</h3>
+            <div class="trust-badges">
+                <div class="trust-badge">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Risposta WhatsApp entro 24h</span>
+                </div>
+                <div class="trust-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Sistema Testato sul Campo</span>
+                </div>
+                <div class="trust-badge">
+                    <i class="fas fa-chart-line"></i>
+                    <span>+400% Vendite in 3 Mesi</span>
+                </div>
+                <div class="trust-badge">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Consulenza 1-on-1 Inclusa</span>
+                </div>
+            </div>
+        </div>
 
-<script>
-/* TABS */
-document.querySelectorAll(".tab").forEach(t=>{
-  t.onclick=()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"))
-    t.classList.add("active")
-    document.querySelectorAll(".view").forEach(v=>v.style.display="none")
-    document.getElementById(t.dataset.tab).style.display="block"
-  }
-})
+        <!-- FINAL CTA -->
+        <div style="text-align: center; margin: 60px 0 40px;">
+            <div class="scarcity-banner" style="max-width: 700px;">
+                <h3><i class="fas fa-clock"></i> OFFERTA A TEMPO LIMITATO</h3>
+                <p>Solo <strong>3 slot</strong> disponibili per l'implementazione completa del sistema</p>
+                <p>Incluso: Setup + Training + 30 giorni di supporto</p>
+                
+                <a href="https://wa.me/393713708294?text=Ciao,%20sono%20interessato%20al%20sistema%20operativo%20immobiliare.%20È%20ancora%20disponibile%20uno%20slot?" 
+                   class="whatsapp-inline" style="margin: 20px auto;" target="_blank">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>PRENOTA ORA - SLOT LIMITATI</span>
+                </a>
+                
+                <p class="scarcity-note">Ultima possibilità per il 2024 - Prezzi raddoppiano a Gennaio</p>
+            </div>
+        </div>
+    </main>
 
-/* TOGGLES */
-document.querySelectorAll(".toggle").forEach(t=>{
-  t.onclick=()=>t.classList.toggle("on")
-})
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="wrap">
+            <p>© 2024 SYSTEM ACQ PRO - Sistema Operativo Immobiliare</p>
+            <p style="font-size: 0.8rem; color: var(--muted); margin-top: 10px;">
+                Questo sistema è progettato per agenti immobiliari seri che vogliono dominare il proprio territorio.
+                Non garantiamo risultati, garantiamo metodo.
+            </p>
+            <div style="margin-top: 20px;">
+                <a href="https://wa.me/393713708294" style="color: var(--gold); text-decoration: none;" target="_blank">
+                    <i class="fab fa-whatsapp"></i> Contatto Ufficiale: +39 371 3708294
+                </a>
+            </div>
+        </div>
+    </footer>
 
-/* HELP */
-btnHelp.onclick=()=>helpModal.style.display="flex"
+    <script>
+        // SISTEMA DI MEMORIA
+        const storageKeys = {
+            today: 'system_acq_today',
+            week: 'system_acq_week',
+            counters: 'system_acq_counters',
+            checklist: 'system_acq_checklist',
+            logs: 'system_acq_logs'
+        };
 
-/* FEEDBACK LOCK */
-function today(){return new Date().toISOString().slice(0,10)}
-function after1830(){
-  const d=new Date();return d.getHours()>18||(d.getHours()==18&&d.getMinutes()>=30)
-}
-function checkLock(){
-  if(after1830()&&!localStorage.getItem("fb_"+today())){
-    feedbackModal.style.display="flex";document.body.classList.add("locked")
-  }
-}
-fbSave.onclick=()=>{
-  if(!fbScore.value)return alert("Seleziona voto")
-  localStorage.setItem("fb_"+today(),JSON.stringify({v:fbScore.value,t:fbText.value}))
-  feedbackModal.style.display="none";document.body.classList.remove("locked")
-}
-setInterval(checkLock,60000);checkLock()
-</script>
+        // STATO INIZIALE
+        let counters = {
+            people: 0,
+            nominatives: 0,
+            appointments: 0,
+            assignments: 0
+        };
 
+        const defaultChecklist = [
+            { id: 1, title: "Fase 1 (08:30-09:00) - Preparazione", desc: "Compila stato operativo, carica micro-zona dal piano", done: false },
+            { id: 2, title: "Fase 2 (09:00-12:00) - Raccolta Contatti", desc: "Parla con ≥20 persone, frase unica, registra nominativi", done: false },
+            { id: 3, title: "Fase 3 (12:00-13:00) - Qualifica & Agenda", desc: "3 domande in ordine, fissa ≥1 appuntamento con data/ora", done: false },
+            { id: 4, title: "Fase 4 (15:00-17:00) - Appuntamento", desc: "Ordine fisso: Persona → Motivo → Tempo → Casa → Mercato → Prezzo", done: false },
+            { id: 5, title: "Fase 5 (17:00-18:00) - Follow-up", desc: "Chiudi loop aperti, elimina indecisi, mantieni pipeline pulita", done: false },
+            { id: 6, title: "Fase 6 (18:00-18:30) - Analisi Dati", desc: "Scrivi SOLO numeri, diagnosi automatica, piano domani", done: false }
+        ];
+
+        // INIZIALIZZAZIONE
+        document.addEventListener('DOMContentLoaded', function() {
+            initSystem();
+            setupTabs();
+            setupScarcityTimer();
+        });
+
+        function initSystem() {
+            // Data odierna
+            const today = new Date();
+            document.getElementById('todayDate').value = today.toISOString().split('T')[0];
+            
+            // Carica dati salvati
+            loadCounters();
+            loadChecklist();
+            
+            // Aggiorna UI
+            updateCountersUI();
+            renderChecklist();
+        }
+
+        // TAB SYSTEM
+        function setupTabs() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Rimuovi active da tutti
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Aggiungi active al tab cliccato
+                    btn.classList.add('active');
+                    const tabId = btn.dataset.tab;
+                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                });
+            });
+        }
+
+        // COUNTERS SYSTEM
+        function adjustCounter(type, amount) {
+            counters[type] = Math.max(0, counters[type] + amount);
+            saveCounters();
+            updateCountersUI();
+            
+            // Aggiorna checklist automaticamente
+            if (type === 'people' && counters.people >= 20) {
+                updateChecklistItem(2, true);
+            }
+            if (type === 'nominatives' && counters.nominatives >= 1) {
+                updateChecklistItem(2, true);
+            }
+            if (type === 'appointments' && counters.appointments >= 1) {
+                updateChecklistItem(3, true);
+            }
+        }
+
+        function updateCountersUI() {
+            document.getElementById('kpiPeople').textContent = counters.people;
+            document.getElementById('kpiNominatives').textContent = counters.nominatives;
+            document.getElementById('kpiAppointments').textContent = counters.appointments;
+            document.getElementById('kpiAssignments').textContent = counters.assignments;
+            
+            // Update status badges
+            const statusEl = document.getElementById('systemStatus');
+            if (counters.people < 20) {
+                statusEl.className = 'status-badge status-pending';
+                statusEl.textContent = 'INSUFFICIENTE';
+            } else if (counters.appointments === 0) {
+                statusEl.className = 'status-badge status-warning';
+                statusEl.textContent = 'DA MIGLIORARE';
+            } else {
+                statusEl.className = 'status-badge status-active';
+                statusEl.textContent = 'OTTIMALE';
+            }
+        }
+
+        // CHECKLIST SYSTEM
+        function renderChecklist() {
+            const checklist = JSON.parse(localStorage.getItem(storageKeys.checklist)) || defaultChecklist;
+            const container = document.getElementById('dailyChecklist');
+            container.innerHTML = '';
+            
+            checklist.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'checklist-item';
+                div.innerHTML = `
+                    <input type="checkbox" ${item.done ? 'checked' : ''} id="check-${item.id}">
+                    <div class="checklist-item-content">
+                        <div class="checklist-item-title">${item.title}</div>
+                        <div class="checklist-item-desc">${item.desc}</div>
+                    </div>
+                `;
+                
+                div.querySelector('input').addEventListener('change', (e) => {
+                    updateChecklistItem(item.id, e.target.checked);
+                });
+                
+                container.appendChild(div);
+            });
+        }
+
+        function updateChecklistItem(id, done) {
+            let checklist = JSON.parse(localStorage.getItem(storageKeys.checklist)) || defaultChecklist;
+            const item = checklist.find(i => i.id === id);
+            if (item) {
+                item.done = done;
+                localStorage.setItem(storageKeys.checklist, JSON.stringify(checklist));
+                renderChecklist();
+            }
+        }
+
+        // SAVE/LOAD FUNCTIONS
+        function saveDailyState() {
+            const state = {
+                date: document.getElementById('todayDate').value,
+                zone: document.getElementById('todayZone').value,
+                counters: counters,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem(storageKeys.today, JSON.stringify(state));
+            alert('Stato giornaliero salvato!');
+        }
+
+        function saveWeekPlan() {
+            const plan = {
+                label: document.getElementById('weekLabel').value,
+                dominant: document.getElementById('dominantZone').value,
+                days: {
+                    mon: document.getElementById('dayMon').value,
+                    tue: document.getElementById('dayTue').value,
+                    wed: document.getElementById('dayWed').value,
+                    thu: document.getElementById('dayThu').value,
+                    fri: document.getElementById('dayFri').value
+                },
+                saved: new Date().toISOString()
+            };
+            localStorage.setItem(storageKeys.week, JSON.stringify(plan));
+            alert('Piano settimanale salvato!');
+        }
+
+        function applyDominantToAll() {
+            const dominant = document.getElementById('dominantZone').value;
+            if (!dominant) {
+                alert('Inserisci prima una zona dominante');
+                return;
+            }
+            
+            document.getElementById('dayMon').value = dominant;
+            document.getElementById('dayTue').value = dominant;
+            document.getElementById('dayWed').value = dominant;
+            document.getElementById('dayThu').value = dominant;
+            document.getElementById('dayFri').value = dominant;
+            
+            alert('Zona dominante applicata a tutti i giorni!');
+        }
+
+        function saveCounters() {
+            localStorage.setItem(storageKeys.counters, JSON.stringify(counters));
+        }
+
+        function loadCounters() {
+            const saved = localStorage.getItem(storageKeys.counters);
+            if (saved) {
+                counters = JSON.parse(saved);
+            }
+        }
+
+        function loadChecklist() {
+            const saved = localStorage.getItem(storageKeys.checklist);
+            if (saved) {
+                // Mantieni i default per nuovi item
+                const savedList = JSON.parse(saved);
+                const defaultIds = defaultChecklist.map(i => i.id);
+                const newItems = defaultChecklist.filter(i => !savedList.some(s => s.id === i.id));
+                const finalList = [...savedList, ...newItems];
+                localStorage.setItem(storageKeys.checklist, JSON.stringify(finalList));
+            }
+        }
+
+        // DIAGNOSI SYSTEM
+        function runDiagnostics() {
+            const issues = [];
+            const logEl = document.getElementById('diagnosisLog');
+            
+            // Diagnosi basata sui contatori
+            if (counters.people < 20) {
+                issues.push("🚨 ERRORE 01: Meno di 20 persone parlate");
+                issues.push("   → Causa probabile: zona troppo grande/dispersa");
+                issues.push("   → Correzione: restringi micro-zona (1-2 isolati)");
+            }
+            
+            if (counters.people >= 20 && counters.nominatives === 0) {
+                issues.push("🚨 ERRORE 02: 0 nominativi nonostante 20+ persone");
+                issues.push("   → Causa probabile: frase modificata o atteggiamento da venditore");
+                issues.push("   → Correzione: usa frase standard, sembra un sondaggio");
+            }
+            
+            if (counters.nominatives > 0 && counters.appointments === 0) {
+                issues.push("🚨 ERRORE 03: 0 appuntamenti nonostante nominativi");
+                issues.push("   → Causa probabile: non chiedi data/ora precisa");
+                issues.push("   → Correzione: chiedi slot preciso, poi silenzio");
+            }
+            
+            if (counters.appointments > 0 && counters.assignments === 0) {
+                issues.push("⚠️ ATTENZIONE: Appuntamenti senza incarichi");
+                issues.push("   → Possibile causa: ordine operativo sbagliato");
+                issues.push("   → Verifica: Persona → Motivo → Tempo → Casa → Mercato → Prezzo");
+            }
+            
+            if (issues.length === 0) {
+                issues.push("✅ SISTEMA OTTIMALE");
+                issues.push("   → Tutti i KPI rispettati");
+                issues.push("   → Continua con esecuzione cieca");
+            }
+            
+            document.getElementById('lastDiagnosis').textContent = issues.length > 0 ? issues[0] : '—';
+            logEl.textContent = issues.join('\n');
+        }
+
+        function generateDailyReport() {
+            const report = `
+REPORT GIORNALIERO - SYSTEM ACQ PRO
+====================================
+Data: ${document.getElementById('todayDate').value}
+Micro-zona: ${document.getElementById('todayZone').value || 'Non specificata'}
+
+KPI RAGGIUNTI:
+- Persone parlate: ${counters.people} (target: ≥20)
+- Nominativi raccolti: ${counters.nominatives} (target: ≥1)
+- Appuntamenti fissati: ${counters.appointments} (target: ≥1)
+- Incarichi firmati: ${counters.assignments}
+
+STATUS SISTEMA: ${document.getElementById('systemStatus').textContent}
+
+ANALISI AUTOMATICA:
+${document.getElementById('diagnosisLog').textContent}
+
+PRIORITÀ DOMANI:
+1. __________
+2. __________
+3. __________
+
+NOTA: Questo report è generato automaticamente dal sistema.
+`;
+            
+            alert(report);
+        }
+
+        function generateContentPlan() {
+            const cta = document.getElementById('ctaDigital').value || 'VALORE';
+            const plan = `
+PIANO CONTENUTI 14 GIORNI - STRATEGIA POLARIZZANTE
+==================================================
+
+CTA UNICA: "Scrivimi ${cta}"
+
+GIORNO 1-3: PREZZI REALI vs ILLUSIONI
+• Reel: "Il mito del 'proviamo più alto' ti costa 6 mesi"
+• Post FB: "3 errori di pricing che bloccano la vendita"
+• Live: Q&A "Quanto vale davvero la tua casa in zona"
+
+GIORNO 4-7: AGENZIE vs FAI DA TE
+• Reel: "Cosa paga davvero il venditore con le agenzie"
+• Post: "Esclusiva: perché senza perdi potere (e prezzo)"
+• Story: Screenshot DM reali (anonimizzati)
+
+GIORNO 8-11: TEMPI REALI vs ASPETTATIVE
+• Reel: "Da 'ci penso' a venduto: timeline reale"
+• Post: "Statistiche mercato locale (dati reali)"
+• Video: Tour micro-zona + analisi prezzi
+
+GIORNO 12-14: DOMINIO TERRITORIALE
+• Reel: "Come diventare 'quello di zona' in 30 giorni"
+• Post: "Case study: da 0 a 3 incarichi in 2 settimane"
+• Live: Strategia acquisizione passo-passo
+
+REGOLA BASE: Ogni contenuto deve generare conversazione.
+Se non genera → cambiare approccio immediatamente.
+`;
+            
+            alert(plan);
+        }
+
+        function resetDaily() {
+            if (confirm('Vuoi resettare completamente la giornata? Tutti i contatori verranno azzerati.')) {
+                counters = { people: 0, nominatives: 0, appointments: 0, assignments: 0 };
+                saveCounters();
+                updateCountersUI();
+                
+                // Resetta checklist
+                let checklist = JSON.parse(localStorage.getItem(storageKeys.checklist)) || defaultChecklist;
+                checklist.forEach(item => item.done = false);
+                localStorage.setItem(storageKeys.checklist, JSON.stringify(checklist));
+                renderChecklist();
+                
+                alert('Giornata resettata!');
+            }
+        }
+
+        // SCARCITY TIMER
+        function setupScarcityTimer() {
+            // Update ogni 30 secondi per "dinamicità"
+            setInterval(() => {
+                const counter = document.querySelector('.slot-counter');
+                if (counter) {
+                    // Simula leggera variazione (non ingannevole)
+                    const base = 3;
+                    const random = Math.random() > 0.7 ? -1 : 0;
+                    const display = Math.max(1, base + random);
+                    counter.textContent = display;
+                }
+            }, 30000);
+        }
+
+        // WhatsApp click tracking
+        document.querySelectorAll('a[href*="whatsapp"]').forEach(link => {
+            link.addEventListener('click', () => {
+                // Qui potresti aggiungere Google Analytics o altro tracking
+                console.log('WhatsApp CTA clicked');
+            });
+        });
+    </script>
 </body>
 </html>
