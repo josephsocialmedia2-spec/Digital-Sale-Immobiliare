@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Agente Operativo – Controllo Procedura</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; line-height: 1.35; }
+    h1 { margin: 0 0 12px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 14px; }
+    .row { display: grid; grid-template-columns: 140px 1fr; gap: 10px; align-items: center; margin: 8px 0; }
+    input, select, button, textarea { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
+    textarea { min-height: 70px; resize: vertical; }
+    button { cursor: pointer; }
+    .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .small { font-size: 12px; color: #666; }
+    .ok { color: #0a7; font-weight: 600; }
+    .bad { color: #c00; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; vertical-align: top; }
+    .pill { display: inline-block; padding: 2px 8px; border: 1px solid #ddd; border-radius: 999px; font-size: 12px; }
+    .footer { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+  </style>
+</head>
+<body>
+  <h1>Agente Operativo – Controllo Procedura</h1>
+  <div class="small">
+    Workflow rigido: stati, regole di disciplina, blocchi (non si “salta avanti”), KPI giornalieri.
+  </div>
+
+  <div class="grid" style="margin-top:16px;">
+    <div class="card">
+      <h2 style="margin:0 0 10px;">1) Crea / Seleziona contatto</h2>
+
+      <div class="row">
+        <div>ID contatto</div>
+        <input id="c_id" placeholder="es. C001" />
+      </div>
+      <div class="row">
+        <div>Nome</div>
+        <input id="c_nome" placeholder="es. Mario Rossi" />
+      </div>
+      <div class="row">
+        <div>Telefono</div>
+        <input id="c_tel" placeholder="es. 3331234567" />
+      </div>
+      <div class="row">
+        <div>Indirizzo</div>
+        <input id="c_addr" placeholder="es. Via Roma 10" />
+      </div>
+
+      <div class="btns" style="margin-top:10px;">
+        <button id="btn_add">Aggiungi contatto</button>
+        <button id="btn_select">Seleziona contatto</button>
+      </div>
+
+      <div class="footer">
+        <span class="pill">Selezionato: <span id="selected_id" class="mono">—</span></span>
+        <span class="pill">Stato: <span id="selected_stage" class="mono">—</span></span>
+        <span class="pill">Rimandi: <span id="selected_postpone" class="mono">0</span></span>
+      </div>
+
+      <div id="msg" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 10px;">2) Azioni (disciplina)</h2>
+
+      <h3 style="margin:10px 0 6px;">A) Log tentativo</h3>
+      <div class="row">
+        <div>Canale</div>
+        <select id="a_channel">
+          <option value="citofono">citofono</option>
+          <option value="telefono">telefono</option>
+          <option value="cartello">cartello</option>
+          <option value="database">database</option>
+        </select>
+      </div>
+      <div class="row">
+        <div>Esito</div>
+        <select id="a_outcome">
+          <option value="no_risposta">no_risposta</option>
+          <option value="rifiuto">rifiuto</option>
+          <option value="conversazione">conversazione</option>
+          <option value="richiamare">richiamare</option>
+        </select>
+      </div>
+      <div class="row">
+        <div>Note</div>
+        <input id="a_notes" placeholder="es. Scala A, proprietario cordiale..." />
+      </div>
+      <button id="btn_attempt">Registra tentativo</button>
+
+      <hr style="margin:14px 0; border:none; border-top:1px solid #eee;" />
+
+      <h3 style="margin:10px 0 6px;">B) Qualifica (obbligatoria)</h3>
+      <div class="row">
+        <div>Motivo</div>
+        <input id="q_motivo" placeholder="es. trasferimento / eredità / cambio casa" />
+      </div>
+      <div class="row">
+        <div>Tempi</div>
+        <input id="q_tempi" placeholder="es. entro 3 mesi" />
+      </div>
+      <div class="row">
+        <div>Prezzo atteso</div>
+        <input id="q_prezzo" placeholder="es. 250-270k" />
+      </div>
+      <div class="row">
+        <div>JTBD</div>
+        <select id="q_jtbd">
+          <option value="">— seleziona —</option>
+          <option value="confusione_valore">confusione_valore</option>
+          <option value="paura_errori">paura_errori</option>
+          <option value="tempistiche">tempistiche</option>
+          <option value="burocrazia_blocco">burocrazia_blocco</option>
+          <option value="solo_curiosita">solo_curiosita</option>
+        </select>
+      </div>
+      <button id="btn_qualify">Salva qualifica</button>
+
+      <hr style="margin:14px 0; border:none; border-top:1px solid #eee;" />
+
+      <h3 style="margin:10px 0 6px;">C) Appuntamento / Rimandi / Scarto</h3>
+      <div class="row">
+        <div>Data appunt.</div>
+        <input id="appt_when" type="datetime-local" />
+      </div>
+      <div class="btns">
+        <button id="btn_appt">Fissa appuntamento</button>
+        <button id="btn_postpone">Segna rimando</button>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <div>Motivo scarto</div>
+        <input id="discard_reason" placeholder="es. non collaborativo / solo prezzo / fake lead" />
+      </div>
+      <button id="btn_discard">Scarta contatto</button>
+
+      <div class="small" style="margin-top:10px;">
+        Regole attive: non puoi fissare appuntamento se mancano motivo/tempi/prezzo/JTBD. Dopo 3 rimandi → PAUSA 14 giorni.
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:16px;">
+    <div class="card">
+      <h2 style="margin:0 0 10px;">3) Lista contatti</h2>
+      <div class="small">Click su un contatto per selezionarlo.</div>
+      <div id="contacts_table"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 10px;">4) KPI di oggi</h2>
+      <div class="btns">
+        <button id="btn_kpi">Calcola KPI</button>
+        <button id="btn_reset">Reset dati (solo in browser)</button>
+      </div>
+      <div id="kpi_box" style="margin-top:10px;"></div>
+
+      <h3 style="margin:14px 0 6px;">Log tentativi (contatto selezionato)</h3>
+      <div id="attempts_box"></div>
+    </div>
+  </div>
+
+<script>
+/** ====== “Controller” in JS (equivalente al Python) ====== **/
+
+const Stage = Object.freeze({
+  NUOVO: "NUOVO",
+  CONTATTATO: "CONTATTATO",
+  QUALIFICATO: "QUALIFICATO",
+  APPUNTAMENTO_FISSATO: "APPUNTAMENTO_FISSATO",
+  VALUTAZIONE_FATTA: "VALUTAZIONE_FATTA",
+  PROPOSTA_INCARICO: "PROPOSTA_INCARICO",
+  ACQUISITO: "ACQUISITO",
+  PAUSA: "PAUSA",
+  SCARTATO: "SCARTATO"
+});
+
+class DisciplineError extends Error {}
+
+function nowISO() { return new Date().toISOString(); }
+function addDays(date, days) { const d = new Date(date); d.setDate(d.getDate() + days); return d; }
+
+function startOfDay(d) {
+  const x = new Date(d);
+  x.setHours(0,0,0,0);
+  return x;
+}
+function endOfDay(d) {
+  const x = startOfDay(d);
+  x.setDate(x.getDate() + 1);
+  return x;
+}
+
+class ProcedureController {
+  constructor() {
+    this.contacts = {}; // id -> contact
+  }
+
+  addContact(c) {
+    this.contacts[c.id] = c;
+  }
+
+  get(id) {
+    const c = this.contacts[id];
+    if (!c) throw new Error("Contatto non trovato: " + id);
+    return c;
+  }
+
+  logAttempt(id, channel, outcome, notes="") {
+    const c = this.get(id);
+    c.attempts.push({
+      when: nowISO(),
+      channel, outcome, notes
+    });
+    if (outcome === "conversazione" && c.stage === Stage.NUOVO) {
+      c.stage = Stage.CONTATTATO;
+    }
+  }
+
+  setQualification(id, motivo, tempi, prezzo_atteso, jtbd) {
+    const c = this.get(id);
+    c.qualification = { motivo, tempi, prezzo_atteso, jtbd };
+    c.stage = Stage.QUALIFICATO;
+  }
+
+  scheduleAppointment(id, whenISO) {
+    const c = this.get(id);
+    this.assertCanSchedule(c);
+    c.stage = Stage.APPUNTAMENTO_FISSATO;
+    c.appointment_when = whenISO || null;
+  }
+
+  markPostponed(id, reason="") {
+    const c = this.get(id);
+    c.postpone_count += 1;
+    c.last_postpone_reason = reason;
+
+    if (c.postpone_count >= 3) {
+      c.stage = Stage.PAUSA;
+      c.pause_until = addDays(new Date(), 14).toISOString();
+    }
+  }
+
+  discard(id, reason) {
+    const c = this.get(id);
+    c.stage = Stage.SCARTATO;
+    c.discarded_reason = reason || "—";
+  }
+
+  assertCanSchedule(c) {
+    const q = c.qualification || {};
+    const missing = [];
+    if (!q.motivo) missing.push("motivo");
+    if (!q.tempi) missing.push("tempi");
+    if (!q.prezzo_atteso) missing.push("prezzo_atteso");
+    if (!q.jtbd) missing.push("jtbd");
+
+    if (missing.length) {
+      throw new DisciplineError("Non puoi fissare appuntamento, mancano: " + missing.join(", "));
+    }
+
+    if (![Stage.CONTATTATO, Stage.QUALIFICATO].includes(c.stage)) {
+      throw new DisciplineError("Stato attuale " + c.stage + ", avanzamento non consentito");
+    }
+
+    if (c.stage === Stage.PAUSA && c.pause_until) {
+      const until = new Date(c.pause_until);
+      if (new Date() < until) throw new DisciplineError("Contatto in PAUSA fino a: " + until.toLocaleString());
+    }
+  }
+
+  dailyKPI(date = new Date()) {
+    const s = startOfDay(date);
+    const e = endOfDay(date);
+
+    let attempts = 0, conversations = 0, appointments = 0, contacts = 0;
+
+    for (const c of Object.values(this.contacts)) {
+      contacts += 1;
+      for (const a of c.attempts) {
+        const t = new Date(a.when);
+        if (t >= s && t < e) {
+          attempts += 1;
+          if (a.outcome === "conversazione") conversations += 1;
+        }
+      }
+      if (c.stage === Stage.APPUNTAMENTO_FISSATO) appointments += 1;
+    }
+
+    return { contacts, attempts, conversations, appointments };
+  }
+}
+
+/** ====== UI glue ====== **/
+
+const pc = loadState() || new ProcedureController();
+let selectedId = null;
+
+function makeContactFromInputs() {
+  const id = $("#c_id").value.trim();
+  if (!id) throw new Error("Inserisci un ID contatto (es. C001)");
+  return {
+    id,
+    nome: $("#c_nome").value.trim(),
+    telefono: $("#c_tel").value.trim(),
+    indirizzo: $("#c_addr").value.trim(),
+    stage: Stage.NUOVO,
+    attempts: [],
+    qualification: { motivo:"", tempi:"", prezzo_atteso:"", jtbd:"" },
+    postpone_count: 0,
+    pause_until: null,
+    discarded_reason: null,
+    appointment_when: null
+  };
+}
+
+function selectContact(id) {
+  selectedId = id;
+  const c = pc.get(id);
+  $("#selected_id").textContent = id;
+  $("#selected_stage").textContent = c.stage;
+  $("#selected_postpone").textContent = String(c.postpone_count || 0);
+  renderAttempts();
+  renderContacts();
+  saveState();
+}
+
+function setMsg(text, ok=true) {
+  $("#msg").innerHTML = ok
+    ? `<div class="ok">✅ ${escapeHtml(text)}</div>`
+    : `<div class="bad">⛔ ${escapeHtml(text)}</div>`;
+}
+
+function renderContacts() {
+  const rows = Object.values(pc.contacts).sort((a,b)=>a.id.localeCompare(b.id)).map(c => {
+    const sel = (c.id === selectedId) ? 'style="font-weight:700;"' : '';
+    const pause = c.pause_until ? ` <span class="pill">pausa fino: ${new Date(c.pause_until).toLocaleDateString()}</span>` : "";
+    return `
+      <tr>
+        <td><a href="#" data-id="${escapeAttr(c.id)}">${escapeHtml(c.id)}</a></td>
+        <td ${sel}>${escapeHtml(c.nome || "—")}</td>
+        <td><span class="pill">${escapeHtml(c.stage)}</span>${pause}</td>
+        <td class="mono">${escapeHtml(c.telefono || "—")}</td>
+        <td>${escapeHtml(c.indirizzo || "—")}</td>
+      </tr>
+    `;
+  }).join("");
+
+  $("#contacts_table").innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Nome</th><th>Stato</th><th>Telefono</th><th>Indirizzo</th>
+        </tr>
+      </thead>
+      <tbody>${rows || `<tr><td colspan="5" class="small">Nessun contatto ancora.</td></tr>`}</tbody>
+    </table>
+  `;
+
+  // bind click
+  document.querySelectorAll('a[data-id]').forEach(a => {
+    a.onclick = (ev) => { ev.preventDefault(); selectContact(a.dataset.id); };
+  });
+}
+
+function renderAttempts() {
+  if (!selectedId) {
+    $("#attempts_box").innerHTML = `<div class="small">Seleziona un contatto per vedere i tentativi.</div>`;
+    return;
+  }
+  const c = pc.get(selectedId);
+  const rows = (c.attempts || []).slice().reverse().map(a => `
+    <tr>
+      <td class="mono">${new Date(a.when).toLocaleString()}</td>
+      <td>${escapeHtml(a.channel)}</td>
+      <td><span class="pill">${escapeHtml(a.outcome)}</span></td>
+      <td>${escapeHtml(a.notes || "")}</td>
+    </tr>
+  `).join("");
+
+  $("#attempts_box").innerHTML = `
+    <table>
+      <thead><tr><th>Quando</th><th>Canale</th><th>Esito</th><th>Note</th></tr></thead>
+      <tbody>${rows || `<tr><td colspan="4" class="small">Nessun tentativo registrato.</td></tr>`}</tbody>
+    </table>
+  `;
+  $("#selected_stage").textContent = c.stage;
+  $("#selected_postpone").textContent = String(c.postpone_count || 0);
+}
+
+function renderKPI() {
+  const k = pc.dailyKPI(new Date());
+  $("#kpi_box").innerHTML = `
+    <div class="pill">Contatti: <span class="mono">${k.contacts}</span></div>
+    <div class="pill">Tentativi oggi: <span class="mono">${k.attempts}</span></div>
+    <div class="pill">Conversazioni oggi: <span class="mono">${k.conversations}</span></div>
+    <div class="pill">Appuntamenti (stato attuale): <span class="mono">${k.appointments}</span></div>
+    <div class="small" style="margin-top:8px;">
+      Nota: “appuntamenti” qui conta lo stato finale APPUNTAMENTO_FISSATO. Se vuoi conteggiare anche gli appuntamenti fissati oggi come evento, lo aggiungo.
+    </div>
+  `;
+}
+
+function saveState() {
+  localStorage.setItem("procedure_controller_state_v1", JSON.stringify({
+    contacts: pc.contacts,
+    selectedId
+  }));
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem("procedure_controller_state_v1");
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    const p = new ProcedureController();
+    p.contacts = data.contacts || {};
+    selectedId = data.selectedId || null;
+    return p;
+  } catch { return null; }
+}
+
+function resetState() {
+  localStorage.removeItem("procedure_controller_state_v1");
+  location.reload();
+}
+
+// helpers
+function $(sel){ return document.querySelector(sel); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function escapeAttr(s){ return escapeHtml(s).replace(/"/g, '&quot;'); }
+
+/** ====== Bind buttons ====== **/
+
+$("#btn_add").onclick = () => {
+  try {
+    const c = makeContactFromInputs();
+    pc.addContact(c);
+    setMsg("Contatto aggiunto: " + c.id, true);
+    selectContact(c.id);
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_select").onclick = () => {
+  try {
+    const id = $("#c_id").value.trim();
+    if (!id) throw new Error("Inserisci un ID contatto da selezionare");
+    selectContact(id);
+    setMsg("Contatto selezionato: " + id, true);
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_attempt").onclick = () => {
+  try {
+    if (!selectedId) throw new Error("Seleziona prima un contatto");
+    pc.logAttempt(selectedId, $("#a_channel").value, $("#a_outcome").value, $("#a_notes").value.trim());
+    setMsg("Tentativo registrato.", true);
+    renderAttempts();
+    renderKPI();
+    renderContacts();
+    saveState();
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_qualify").onclick = () => {
+  try {
+    if (!selectedId) throw new Error("Seleziona prima un contatto");
+    pc.setQualification(
+      selectedId,
+      $("#q_motivo").value.trim(),
+      $("#q_tempi").value.trim(),
+      $("#q_prezzo").value.trim(),
+      $("#q_jtbd").value
+    );
+    setMsg("Qualifica salvata. Stato → QUALIFICATO.", true);
+    renderAttempts();
+    renderContacts();
+    saveState();
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_appt").onclick = () => {
+  try {
+    if (!selectedId) throw new Error("Seleziona prima un contatto");
+    const when = $("#appt_when").value;
+    pc.scheduleAppointment(selectedId, when ? new Date(when).toISOString() : null);
+    setMsg("Appuntamento fissato. Stato → APPUNTAMENTO_FISSATO.", true);
+    renderAttempts();
+    renderContacts();
+    renderKPI();
+    saveState();
+  } catch (e) {
+    if (e instanceof DisciplineError) setMsg(e.message, false);
+    else setMsg(e.message || String(e), false);
+  }
+};
+
+$("#btn_postpone").onclick = () => {
+  try {
+    if (!selectedId) throw new Error("Seleziona prima un contatto");
+    pc.markPostponed(selectedId, "rimando manuale");
+    const c = pc.get(selectedId);
+    if (c.stage === Stage.PAUSA) {
+      setMsg("3 rimandi raggiunti → PAUSA fino a " + new Date(c.pause_until).toLocaleString(), true);
+    } else {
+      setMsg("Rimando registrato. Totale rimandi: " + c.postpone_count, true);
+    }
+    renderAttempts();
+    renderContacts();
+    renderKPI();
+    saveState();
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_discard").onclick = () => {
+  try {
+    if (!selectedId) throw new Error("Seleziona prima un contatto");
+    const reason = $("#discard_reason").value.trim();
+    pc.discard(selectedId, reason);
+    setMsg("Contatto scartato. Stato → SCARTATO.", true);
+    renderAttempts();
+    renderContacts();
+    renderKPI();
+    saveState();
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_kpi").onclick = () => renderKPI();
+$("#btn_reset").onclick = () => resetState();
+
+// initial render
+renderContacts();
+if (selectedId && pc.contacts[selectedId]) selectContact(selectedId);
+renderKPI();
+</script>
+</body>
+</html>
