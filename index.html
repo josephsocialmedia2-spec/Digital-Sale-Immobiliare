@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Archivio Contatti + Volantini (Dark Gold)</title>
+  <title>Archivio Contatti + Volantini + Mappa Copertura</title>
 
   <style>
     :root{
@@ -16,6 +16,8 @@
       --ok:#25d366;
       --bad:#ff4d4d;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --chip: rgba(0,0,0,.22);
+      --chip2: rgba(255,255,255,.06);
     }
 
     *{ box-sizing:border-box; }
@@ -89,6 +91,7 @@
     button:active{ transform: translateY(0); filter: brightness(.98); }
 
     .btns{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+
     .pill{
       display:inline-block;
       padding: 2px 10px;
@@ -109,7 +112,7 @@
     a{ color: rgba(255,209,102,.95); text-decoration:none; font-weight: 950; }
     a:hover{ text-decoration: underline; }
 
-    /* pulse add contact */
+    /* pulse add */
     #btn_add.pulse{ animation: pulseAdd 1.2s ease-in-out infinite; }
     @keyframes pulseAdd{
       0%{ box-shadow: 0 0 0 0 rgba(216,162,58,.28); }
@@ -131,8 +134,8 @@
     }
     .modalBackdrop.show{ display:flex; }
     .modalCard{
-      width: min(860px, 96vw);
-      max-height: min(82vh, 760px);
+      width: min(920px, 96vw);
+      max-height: min(84vh, 820px);
       overflow: auto;
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
       border: 1px solid rgba(255,255,255,.14);
@@ -189,13 +192,6 @@
       cursor:pointer;
     }
 
-    .split{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    @media (max-width: 980px){ .split{ grid-template-columns:1fr; } }
-
     .warning{
       border: 1px solid rgba(216,162,58,.35);
       background: rgba(216,162,58,.10);
@@ -203,12 +199,112 @@
       padding: 10px 12px;
       margin-top: 10px;
     }
+
+    /* ===== MAPPA ===== */
+    .mapWrap{
+      display:grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 12px;
+    }
+    @media (max-width: 980px){ .mapWrap{ grid-template-columns:1fr; } }
+
+    .streetList{
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      background: rgba(0,0,0,.18);
+      overflow: hidden;
+    }
+    .streetItem{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      cursor:pointer;
+    }
+    .streetItem:last-child{ border-bottom:none; }
+    .streetItem:hover{ background: rgba(255,255,255,.04); }
+    .streetItem.active{
+      background: rgba(216,162,58,.12);
+      outline: 1px solid rgba(216,162,58,.25);
+    }
+    .streetName{
+      font-weight: 1000;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .streetMeta{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .bar{
+      width: 120px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .bar > div{
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(255,209,102,.95), rgba(216,162,58,.85));
+    }
+
+    .civicsBox{
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      background: rgba(0,0,0,.18);
+      padding: 12px;
+    }
+    .civicsGrid{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+    .civicChip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: var(--chip);
+      font-weight: 950;
+      font-size: 12px;
+    }
+    .civicChip .dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.20);
+      border: 1px solid rgba(255,255,255,.18);
+    }
+    .civicChip.touched{
+      border-color: rgba(216,162,58,.35);
+      background: rgba(216,162,58,.12);
+    }
+    .civicChip.touched .dot{
+      background: rgba(255,209,102,.95);
+      border-color: rgba(216,162,58,.55);
+    }
+    .civicChip .mini{
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 800;
+    }
   </style>
 </head>
 
 <body>
-  <h1>📇 Archivio Contatti + 📩 Volantini</h1>
-  <div class="small">Dati salvati localmente nel browser. Nessun reset in UI.</div>
+  <h1>📇 Archivio Contatti + 📩 Volantini + 🗺️ Mappa</h1>
+  <div class="small">Dati salvati localmente nel browser. La “mappa” cresce man mano che tocchi vie e civici (senza KPI giudicanti).</div>
 
   <div class="grid" style="margin-top:16px;">
     <div class="card">
@@ -249,15 +345,13 @@
     <div class="card">
       <h2>Volantino del mese</h2>
 
-      <div class="split">
-        <div>
-          <div class="small">Titolo volantino</div>
-          <input id="fly_title" placeholder="es. Promo Febbraio 2026" />
-        </div>
-        <div>
-          <div class="small">Mese di invio</div>
-          <input id="fly_month" type="month" />
-        </div>
+      <div class="row">
+        <div>Titolo</div>
+        <input id="fly_title" placeholder="es. Promo Febbraio 2026" />
+      </div>
+      <div class="row">
+        <div>Mese invio</div>
+        <input id="fly_month" type="month" />
       </div>
 
       <div style="margin-top:10px;">
@@ -289,6 +383,43 @@
     </div>
   </div>
 
+  <div class="card" style="margin-top:16px;">
+    <h2>🗺️ Mappa copertura (vie + civici)</h2>
+    <div class="small">Qui non “valuti” nessuno: vedi solo il territorio che si riempie col lavoro. Ogni selezione/WhatsApp segna un civico.</div>
+
+    <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <span class="pill">Vie in archivio: <span id="map_streets" class="mono">0</span></span>
+      <span class="pill">Civici in archivio: <span id="map_civics_total" class="mono">0</span></span>
+      <span class="pill">Civici toccati: <span id="map_civics_touched" class="mono">0</span></span>
+      <span class="pill">Ultimo “toccatо”: <span id="map_last_touch" class="mono">—</span></span>
+
+      <div style="margin-left:auto; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <span class="small">Filtro mese</span>
+        <input id="map_month" type="month" style="width:auto; min-width:160px;" />
+        <button id="btn_map_clear_filter" type="button" style="width:auto;">Tutti</button>
+      </div>
+    </div>
+
+    <div class="mapWrap" style="margin-top:12px;">
+      <div class="streetList" id="street_list"></div>
+
+      <div class="civicsBox">
+        <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center;">
+          <div>
+            <div class="pill">Via: <span id="map_current_street" class="mono">—</span></div>
+          </div>
+          <div class="pill">Copertura via: <span id="map_street_cov" class="mono">—</span></div>
+        </div>
+
+        <div class="small" style="margin-top:10px;">
+          ✅ = civico “toccato” (selezione contatto o invio WhatsApp). ◻️ = ancora da toccare.
+        </div>
+
+        <div class="civicsGrid" id="civics_grid"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL contatto -->
   <div class="modalBackdrop" id="contactModal" aria-hidden="true">
     <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
@@ -302,24 +433,35 @@
 
 <script>
 /* ========= PERSISTENZA ========= */
-const LS_KEY = "procedure_contacts_v2";
+const LS_KEY = "app_contacts_with_map_v1";
 const LS_FLY_META = "flyers_meta_v1";
+const DB_NAME = "flyers_db_v1";
+const STORE = "flyers";
 
-/* ========= CONTATTI ========= */
-const pc = { contacts: loadContacts() };
-let selectedId = null;
+/* ========= STATE ========= */
+const state = loadState() || { contacts: {}, selectedId: null, lastTouchISO: null, mapSelectedStreet: null };
+let selectedId = state.selectedId || null;
 
-/* helpers */
+/* ========= helpers ========= */
 const $ = (sel) => document.querySelector(sel);
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 function escapeAttr(s){ return escapeHtml(s).replace(/"/g, '&quot;'); }
 function setMsg(text, ok=true){
   $("#msg").innerHTML = ok ? `<div class="ok">✅ ${escapeHtml(text)}</div>` : `<div class="bad">⛔ ${escapeHtml(text)}</div>`;
 }
+function saveState(){
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch{ return null; }
+}
 
-/* ID automatico C001, C002... */
+/* ========= CONTATTI ========= */
 function nextContactId(){
-  const ids = Object.keys(pc.contacts || {});
+  const ids = Object.keys(state.contacts || {});
   let max = 0;
   ids.forEach(id=>{
     const m = String(id).match(/^C(\d+)$/i);
@@ -328,34 +470,48 @@ function nextContactId(){
   return "C" + String(max + 1).padStart(3,"0");
 }
 
+/* Parsing indirizzo -> via + civico (best-effort, non rompe nulla) */
+function parseAddress(raw){
+  const s = String(raw || "").trim();
+  if(!s) return { street: "", civic: "" };
+
+  // prova a prendere ultimo numero come civico
+  const m = s.match(/(.+?)\s+(\d+[A-Za-z]?)\s*$/);
+  if(m){
+    const street = normalizeStreet(m[1]);
+    const civic = String(m[2]).toUpperCase();
+    return { street, civic };
+  }
+  // fallback: tutta stringa come via, civico sconosciuto
+  return { street: normalizeStreet(s), civic: "" };
+}
+
+function normalizeStreet(street){
+  const x = String(street || "").trim()
+    .replace(/\s+/g," ")
+    .replace(/[.,;:]+$/,"");
+  return x;
+}
+
 function makeContactFromInputs(){
   let id = $("#c_id").value.trim();
   if(!id){
     id = nextContactId();
     $("#c_id").value = id;
   }
+  const nome = $("#c_nome").value.trim() || "—";
+  const telefono = $("#c_tel").value.trim() || "";
+  const indirizzo = $("#c_addr").value.trim() || "";
+
+  const parsed = parseAddress(indirizzo);
   return {
-    id,
-    nome: $("#c_nome").value.trim() || "—",
-    telefono: $("#c_tel").value.trim() || "",
-    indirizzo: $("#c_addr").value.trim() || ""
+    id, nome, telefono, indirizzo,
+    street: parsed.street, civic: parsed.civic,
+    touches: [] // [{whenISO, reason}] -> costruisce la mappa
   };
 }
 
-function saveContacts(){
-  localStorage.setItem(LS_KEY, JSON.stringify({ contacts: pc.contacts, selectedId }));
-}
-function loadContacts(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(!raw) return {};
-    const data = JSON.parse(raw);
-    selectedId = data.selectedId || null;
-    return data.contacts || {};
-  }catch{ return {}; }
-}
-
-/* pulse add */
+/* ========= pulse add ========= */
 function updateAddPulse(){
   const nome = $("#c_nome").value.trim();
   const tel  = $("#c_tel").value.trim();
@@ -368,47 +524,76 @@ function updateAddPulse(){
   if(el) el.addEventListener("input", updateAddPulse);
 });
 
-/* render contacts */
+/* ========= “tocca” civico per la mappa ========= */
+function touchContact(id, reason){
+  const c = state.contacts[id];
+  if(!c) return;
+
+  const whenISO = new Date().toISOString();
+  c.touches = Array.isArray(c.touches) ? c.touches : [];
+  c.touches.push({ whenISO, reason: reason || "touch" });
+
+  state.lastTouchISO = whenISO;
+  saveState();
+}
+
+/* ========= render contatti ========= */
 function renderContacts(){
-  const rows = Object.values(pc.contacts)
+  const rows = Object.values(state.contacts)
     .sort((a,b)=>a.id.localeCompare(b.id))
-    .map(c => `
-      <tr>
-        <td><a href="#" data-id="${escapeAttr(c.id)}">${escapeHtml(c.id)}</a></td>
-        <td>${escapeHtml(c.nome || "—")}</td>
-        <td class="mono">${escapeHtml(c.telefono || "—")}</td>
-        <td>${escapeHtml(c.indirizzo || "—")}</td>
-      </tr>
-    `).join("");
+    .map(c => {
+      const mark = (c.touches && c.touches.length) ? "✅" : "◻️";
+      const addrMini = c.street ? `${c.street}${c.civic ? " " + c.civic : ""}` : (c.indirizzo || "—");
+      return `
+        <tr>
+          <td><a href="#" data-id="${escapeAttr(c.id)}">${escapeHtml(c.id)}</a></td>
+          <td>${escapeHtml(c.nome || "—")}</td>
+          <td class="mono">${escapeHtml(c.telefono || "—")}</td>
+          <td>${escapeHtml(addrMini)}</td>
+          <td class="mono">${mark}</td>
+        </tr>
+      `;
+    }).join("");
 
   $("#contacts_table").innerHTML = `
     <table>
-      <thead><tr><th>ID</th><th>Nome</th><th>Telefono</th><th>Indirizzo</th></tr></thead>
-      <tbody>${rows || `<tr><td colspan="4" class="small">Nessun contatto ancora.</td></tr>`}</tbody>
+      <thead><tr><th>ID</th><th>Nome</th><th>Telefono</th><th>Via/Civico</th><th>Touch</th></tr></thead>
+      <tbody>${rows || `<tr><td colspan="5" class="small">Nessun contatto ancora.</td></tr>`}</tbody>
     </table>
   `;
 
   document.querySelectorAll('a[data-id]').forEach(a=>{
-    a.onclick = (ev)=>{ ev.preventDefault(); selectContact(a.dataset.id); };
+    a.onclick = (ev)=>{ ev.preventDefault(); selectContact(a.dataset.id, "select_table"); };
   });
 }
 
-/* select + modal */
-function selectContact(id){
-  if(!pc.contacts[id]) throw new Error("Contatto non trovato: " + id);
+/* ========= select + modal ========= */
+function selectContact(id, reason){
+  if(!state.contacts[id]) throw new Error("Contatto non trovato: " + id);
   selectedId = id;
+  state.selectedId = id;
+
   $("#selected_id").textContent = id;
-  saveContacts();
+
+  // segnalo “touch” (costruzione mappa) anche solo selezionando
+  touchContact(id, reason || "select");
+
+  saveState();
   updateAddPulse();
-  openContactModal(pc.contacts[id]);
+  openContactModal(state.contacts[id]);
+
+  // aggiorna mappa live
+  renderMap();
 }
 
-/* modal */
 function openContactModal(c){
   const telRaw = String(c.telefono || "").trim();
   const telDigits = telRaw.replace(/\D/g,"");
   const telLink = telDigits ? `tel:${telDigits}` : "";
   const waLink  = telDigits ? `https://wa.me/${telDigits}` : "";
+
+  const addrNice = c.street ? `${c.street}${c.civic ? " " + c.civic : ""}` : (c.indirizzo || "—");
+  const touches = (c.touches || []).slice().reverse().slice(0,5);
 
   $("#contactModalBody").innerHTML = `
     <h3>Come contattarlo</h3>
@@ -417,16 +602,48 @@ function openContactModal(c){
     <div class="modalActions">
       <a class="modalBtn" href="${escapeAttr(telLink)}" ${telDigits ? "" : "onclick='return false'"}>📞 Chiama</a>
       <a class="modalBtn" href="${escapeAttr(waLink)}" target="_blank" rel="noopener" ${telDigits ? "" : "onclick='return false'"}>🟢 WhatsApp</a>
+      <button class="modalBtn" type="button" id="btn_touch_now">✅ Segna “toccato” ora</button>
     </div>
 
     <h3>Dettagli</h3>
     <div class="pill">ID: <span class="mono">${escapeHtml(c.id)}</span></div>
     <div style="margin-top:8px;"><b>Nome:</b> ${escapeHtml(c.nome || "—")}</div>
-    <div style="margin-top:6px;"><b>Indirizzo:</b> ${escapeHtml(c.indirizzo || "—")}</div>
+    <div style="margin-top:6px;"><b>Via/Civico:</b> ${escapeHtml(addrNice)}</div>
+
+    <h3>Ultimi tocchi (mappa)</h3>
+    ${
+      touches.length ? `
+        <table>
+          <thead><tr><th>Quando</th><th>Motivo</th></tr></thead>
+          <tbody>
+            ${touches.map(t => `
+              <tr>
+                <td class="mono">${escapeHtml(new Date(t.whenISO).toLocaleString())}</td>
+                <td>${escapeHtml(t.reason || "touch")}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      ` : `<div class="small">Nessun tocco registrato.</div>`
+    }
   `;
+
+  // bind segna touch
+  const btn = document.getElementById("btn_touch_now");
+  if(btn){
+    btn.onclick = ()=>{
+      touchContact(c.id, "manual_touch");
+      setMsg("Segnato come toccato ✅", true);
+      renderMap();
+      // aggiorna modal (per vedere tocchi)
+      openContactModal(state.contacts[c.id]);
+    };
+  }
+
   $("#contactModal").classList.add("show");
   $("#contactModal").setAttribute("aria-hidden","false");
 }
+
 function closeContactModal(){
   $("#contactModal").classList.remove("show");
   $("#contactModal").setAttribute("aria-hidden","true");
@@ -439,19 +656,20 @@ document.addEventListener("keydown", (e)=>{
   if(e.key === "Escape") closeContactModal();
 });
 
-/* buttons */
+/* ========= CONTATTI buttons ========= */
 $("#btn_add").onclick = ()=>{
   try{
     const c = makeContactFromInputs();
-    pc.contacts[c.id] = c;
-    saveContacts();
+    state.contacts[c.id] = c;
+    saveState();
     renderContacts();
+    renderMap();
     setMsg("Contatto aggiunto: " + c.id, true);
-    // clear inputs except id
+
+    $("#c_id").value = "";
     $("#c_nome").value = "";
     $("#c_tel").value = "";
     $("#c_addr").value = "";
-    $("#c_id").value = "";
     updateAddPulse();
   }catch(e){ setMsg(e.message || String(e), false); }
 };
@@ -459,16 +677,13 @@ $("#btn_add").onclick = ()=>{
 $("#btn_select").onclick = ()=>{
   try{
     const id = $("#c_id").value.trim();
-    if(!id) throw new Error("Inserisci un ID (es. C001) o clicca un contatto in tabella.");
-    selectContact(id);
+    if(!id) throw new Error("Inserisci un ID (es. C001) oppure clicca un contatto in tabella.");
+    selectContact(id, "select_button");
     setMsg("Contatto selezionato: " + id, true);
   }catch(e){ setMsg(e.message || String(e), false); }
 };
 
 /* ========= VOLANTINI (IndexedDB per salvare file) ========= */
-const DB_NAME = "flyers_db_v1";
-const STORE = "flyers";
-
 function openDB(){
   return new Promise((resolve, reject)=>{
     const req = indexedDB.open(DB_NAME, 1);
@@ -503,34 +718,13 @@ async function dbGetFlyer(id){
   });
 }
 
-async function dbGetAllFlyers(){
-  const db = await openDB();
-  return new Promise((resolve, reject)=>{
-    const tx = db.transaction(STORE, "readonly");
-    const req = tx.objectStore(STORE).getAll();
-    req.onsuccess = ()=> resolve(req.result || []);
-    req.onerror = ()=> reject(req.error);
-  });
-}
-
 function flyerId(){
   return "F" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 }
-
 function fmtMonth(ym){
   if(!ym) return "—";
   const [y,m] = ym.split("-");
   return `${m}/${y}`;
-}
-
-function currentFlyerMessage(contact){
-  const c = contact || (selectedId ? pc.contacts[selectedId] : null);
-  const name = c?.nome && c.nome !== "—" ? c.nome : "ciao";
-  const meta = getSelectedFlyerMeta();
-  const title = meta?.title || "Volantino";
-  const month = meta?.month ? fmtMonth(meta.month) : "";
-  const note = meta?.note ? `\n\nNote: ${meta.note}` : "";
-  return `Ciao ${name}! 👋\nTi mando il ${title}${month ? " ("+month+")" : ""}.${note}\n\n(Allego il volantino qui in chat)`;
 }
 
 function saveFlyerMetaList(list){
@@ -543,12 +737,22 @@ function loadFlyerMetaList(){
   }catch{ return []; }
 }
 
-let flyersMeta = loadFlyerMetaList(); // [{id,title,month,note,filename,mime,createdAt}]
+let flyersMeta = loadFlyerMetaList();
 let selectedFlyerId = flyersMeta[0]?.id || null;
 
 function getSelectedFlyerMeta(){
   if(!selectedFlyerId) return null;
   return flyersMeta.find(x=>x.id === selectedFlyerId) || null;
+}
+
+function currentFlyerMessage(contact){
+  const c = contact || (selectedId ? state.contacts[selectedId] : null);
+  const name = c?.nome && c.nome !== "—" ? c.nome : "ciao";
+  const meta = getSelectedFlyerMeta();
+  const title = meta?.title || "Volantino";
+  const month = meta?.month ? fmtMonth(meta.month) : "";
+  const note = meta?.note ? `\n\nNote: ${meta.note}` : "";
+  return `Ciao ${name}! 👋\nTi mando il ${title}${month ? " ("+month+")" : ""}.${note}\n\n(Allego il volantino qui in chat)`;
 }
 
 function renderFlyers(){
@@ -575,7 +779,6 @@ function renderFlyers(){
     }).join("");
 
   $("#fly_list").innerHTML = rows;
-
   document.querySelectorAll("[data-sel]").forEach(btn=>{
     btn.onclick = ()=>{
       selectedFlyerId = btn.getAttribute("data-sel");
@@ -593,7 +796,7 @@ $("#btn_fly_save").onclick = async ()=>{
     if(!file) throw new Error("Carica un file volantino (PDF o immagine).");
 
     const id = flyerId();
-    const blob = file; // File è già un Blob
+    const blob = file;
     const mime = file.type || "application/octet-stream";
     const filename = file.name || "volantino";
 
@@ -604,7 +807,6 @@ $("#btn_fly_save").onclick = async ()=>{
     saveFlyerMetaList(flyersMeta);
     selectedFlyerId = id;
 
-    // reset input file (così puoi ricaricare lo stesso file se vuoi)
     $("#fly_file").value = "";
     setMsg("Volantino salvato in archivio ✅", true);
     renderFlyers();
@@ -622,7 +824,6 @@ $("#btn_fly_preview").onclick = async ()=>{
 
     const url = URL.createObjectURL(rec.blob);
     window.open(url, "_blank", "noopener");
-    // non revoco subito, altrimenti la tab può perdere il file
     setTimeout(()=> URL.revokeObjectURL(url), 60_000);
   }catch(e){
     setMsg(e.message || String(e), false);
@@ -631,13 +832,12 @@ $("#btn_fly_preview").onclick = async ()=>{
 
 $("#btn_fly_copy").onclick = async ()=>{
   try{
-    const text = currentFlyerMessage(selectedId ? pc.contacts[selectedId] : null);
+    const text = currentFlyerMessage(selectedId ? state.contacts[selectedId] : null);
     await navigator.clipboard.writeText(text);
     setMsg("Testo WhatsApp copiato ✅", true);
-  }catch(e){
-    // fallback
+  }catch{
     const ta = document.createElement("textarea");
-    ta.value = currentFlyerMessage(selectedId ? pc.contacts[selectedId] : null);
+    ta.value = currentFlyerMessage(selectedId ? state.contacts[selectedId] : null);
     document.body.appendChild(ta);
     ta.select();
     document.execCommand("copy");
@@ -648,35 +848,197 @@ $("#btn_fly_copy").onclick = async ()=>{
 
 $("#btn_fly_whatsapp").onclick = ()=>{
   try{
-    if(!selectedId) throw new Error("Seleziona prima un contatto (così il messaggio ha nome/numero).");
-    const c = pc.contacts[selectedId];
+    if(!selectedId) throw new Error("Seleziona prima un contatto.");
+    const c = state.contacts[selectedId];
     const telDigits = String(c.telefono || "").replace(/\D/g,"");
     if(!telDigits) throw new Error("Il contatto non ha un numero valido.");
+
+    // touch mappa (azione reale)
+    touchContact(selectedId, "whatsapp_flyer");
+
     const msg = currentFlyerMessage(c);
     const url = `https://wa.me/${telDigits}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank", "noopener");
-    setMsg("WhatsApp aperto: incolla/allega il volantino nella chat ✅", true);
+
+    setMsg("WhatsApp aperto ✅ (allega il volantino in chat). Mappa aggiornata.", true);
+    renderMap();
   }catch(e){
     setMsg(e.message || String(e), false);
   }
 };
 
-/* init */
-renderContacts();
-renderFlyers();
-updateAddPulse();
+/* ========= MAPPA ========= */
 
-/* se avevi un selectedId salvato */
-try{
-  const raw = localStorage.getItem(LS_KEY);
-  if(raw){
-    const data = JSON.parse(raw);
-    if(data.selectedId && pc.contacts[data.selectedId]){
-      selectedId = data.selectedId;
-      $("#selected_id").textContent = selectedId;
+/* costruiamo: street -> { civics: Map(civic -> {touchedCount, lastTouchedISO}) } */
+function buildMapData(monthFilter){
+  const byStreet = new Map();
+
+  const monthPrefix = monthFilter ? (monthFilter + "-") : null; // YYYY-MM-
+
+  for(const c of Object.values(state.contacts)){
+    const street = (c.street || "").trim();
+    const civic = (c.civic || "").trim();
+
+    if(!street) continue; // senza via non mappo
+
+    if(!byStreet.has(street)) byStreet.set(street, new Map());
+    const civicsMap = byStreet.get(street);
+
+    const civicKey = civic || "—"; // civico sconosciuto
+    if(!civicsMap.has(civicKey)){
+      civicsMap.set(civicKey, { total: 0, touched: 0, lastTouchedISO: null });
+    }
+    const node = civicsMap.get(civicKey);
+    node.total += 1; // quanti contatti hai su quel civico (utile)
+
+    // touched?
+    const touches = Array.isArray(c.touches) ? c.touches : [];
+    const touchesFiltered = monthPrefix
+      ? touches.filter(t => String(t.whenISO || "").startsWith(monthPrefix))
+      : touches;
+
+    if(touchesFiltered.length){
+      node.touched = 1; // civico “toccato” (non conta quante volte: basta 1 per mappa)
+      const last = touchesFiltered.reduce((acc, t)=> (acc && acc > t.whenISO) ? acc : t.whenISO, null);
+      node.lastTouchedISO = last;
     }
   }
-}catch{}
+
+  return byStreet;
+}
+
+function getMapMonthFilter(){
+  const v = $("#map_month").value;
+  return v ? v : "";
+}
+
+function renderMap(){
+  const monthFilter = getMapMonthFilter();
+  const byStreet = buildMapData(monthFilter);
+
+  const streets = Array.from(byStreet.keys()).sort((a,b)=>a.localeCompare(b, "it"));
+  $("#map_streets").textContent = String(streets.length);
+
+  let totalCivics = 0;
+  let touchedCivics = 0;
+  let lastTouch = null;
+
+  // compute stats
+  for(const st of streets){
+    const civicsMap = byStreet.get(st);
+    for(const [civ, node] of civicsMap.entries()){
+      totalCivics += 1;
+      if(node.touched){
+        touchedCivics += 1;
+        if(node.lastTouchedISO && (!lastTouch || node.lastTouchedISO > lastTouch)) lastTouch = node.lastTouchedISO;
+      }
+    }
+  }
+
+  $("#map_civics_total").textContent = String(totalCivics);
+  $("#map_civics_touched").textContent = String(touchedCivics);
+  $("#map_last_touch").textContent = lastTouch ? new Date(lastTouch).toLocaleString() : "—";
+
+  // selected street
+  if(!state.mapSelectedStreet || !byStreet.has(state.mapSelectedStreet)){
+    state.mapSelectedStreet = streets[0] || null;
+  }
+
+  // render street list
+  const list = $("#street_list");
+  if(!streets.length){
+    list.innerHTML = `<div class="small" style="padding:12px;">Nessuna via mappabile: inserisci indirizzi tipo “Via Roma 10”.</div>`;
+    $("#map_current_street").textContent = "—";
+    $("#map_street_cov").textContent = "—";
+    $("#civics_grid").innerHTML = "";
+    saveState();
+    return;
+  }
+
+  list.innerHTML = streets.map(st=>{
+    const civicsMap = byStreet.get(st);
+    const civicsArr = Array.from(civicsMap.entries());
+    const tot = civicsArr.length;
+    const touched = civicsArr.filter(([,n])=>n.touched).length;
+    const pct = tot ? Math.round((touched / tot) * 100) : 0;
+
+    const active = (st === state.mapSelectedStreet) ? "active" : "";
+    return `
+      <div class="streetItem ${active}" data-street="${escapeAttr(st)}">
+        <div style="min-width:0;">
+          <div class="streetName">${escapeHtml(st)}</div>
+          <div class="small">Civici: <span class="mono">${touched}/${tot}</span></div>
+        </div>
+        <div class="streetMeta">
+          <div class="bar" title="${pct}%"><div style="width:${pct}%;"></div></div>
+          <span class="pill mono">${pct}%</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  list.querySelectorAll("[data-street]").forEach(el=>{
+    el.onclick = ()=>{
+      state.mapSelectedStreet = el.getAttribute("data-street");
+      saveState();
+      renderMap();
+    };
+  });
+
+  // render civics grid for selected street
+  const cur = state.mapSelectedStreet;
+  $("#map_current_street").textContent = cur || "—";
+
+  const civicsMap = byStreet.get(cur);
+  const civicsArr = Array.from(civicsMap.entries())
+    .sort((a,b)=>{
+      // sort numeric civics first
+      const aa = a[0], bb = b[0];
+      const na = parseInt(String(aa).match(/^\d+/)?.[0] || "999999", 10);
+      const nb = parseInt(String(bb).match(/^\d+/)?.[0] || "999999", 10);
+      if(na !== nb) return na - nb;
+      return String(aa).localeCompare(String(bb), "it");
+    });
+
+  const tot = civicsArr.length;
+  const touched = civicsArr.filter(([,n])=>n.touched).length;
+  $("#map_street_cov").textContent = `${touched}/${tot}`;
+
+  $("#civics_grid").innerHTML = civicsArr.map(([civ, node])=>{
+    const cls = node.touched ? "civicChip touched" : "civicChip";
+    const last = node.lastTouchedISO ? new Date(node.lastTouchedISO).toLocaleDateString() : "";
+    return `
+      <div class="${cls}" title="${node.touched ? "Toccato" : "Non toccato"}">
+        <span class="dot"></span>
+        <span class="mono">${escapeHtml(civ)}</span>
+        ${node.touched && last ? `<span class="mini">• ${escapeHtml(last)}</span>` : ``}
+      </div>
+    `;
+  }).join("");
+
+  saveState();
+}
+
+/* ========= MAPPA UI events ========= */
+$("#btn_map_clear_filter").onclick = ()=>{
+  $("#map_month").value = "";
+  renderMap();
+};
+$("#map_month").addEventListener("change", renderMap);
+
+/* ========= VOLANTINI meta list init ========= */
+function renderFlyersInit(){
+  renderFlyers();
+}
+
+/* ========= INIT ========= */
+renderContacts();
+renderFlyersInit();
+updateAddPulse();
+if(selectedId && state.contacts[selectedId]){
+  $("#selected_id").textContent = selectedId;
+}
+renderMap();
 </script>
 </body>
 </html>
