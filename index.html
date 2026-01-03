@@ -1,142 +1,682 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Agente Operativo – Archivio Contatti</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Archivio Contatti + Volantini (Dark Gold)</title>
 
-<style>
-:root{
-  --bg:#0a0a0a;
-  --text:#f3f4f6;
-  --muted:#a0adb8;
-  --border:rgba(255,255,255,.12);
-  --gold:#d8a23a;
-  --ok:#25d366;
-  --bad:#ff4d4d;
-}
-*{box-sizing:border-box}
-body{
-  margin:24px;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  background:var(--bg);
-  color:var(--text);
-}
-.card{
-  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-  margin-bottom:14px;
-}
-input,select,button{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:rgba(0,0,0,.3);
-  color:var(--text);
-}
-button{
-  font-weight:900;
-  background:linear-gradient(135deg,#ffd166,#d8a23a);
-  color:#000;
-  cursor:pointer;
-}
-button:hover{filter:brightness(1.05)}
-table{width:100%;border-collapse:collapse}
-th,td{border-bottom:1px solid var(--border);padding:8px}
-tr:hover{background:rgba(255,255,255,.05);cursor:pointer}
-.pill{border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:12px}
-.ok{color:var(--ok);font-weight:800}
-.bad{color:var(--bad);font-weight:900}
-#btn_add.pulse{animation:pulse 1.2s infinite}
-@keyframes pulse{
-  0%{box-shadow:0 0 0 0 rgba(216,162,58,.4)}
-  70%{box-shadow:0 0 0 14px transparent}
-  100%{box-shadow:0 0 0 0 transparent}
-}
-#modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center}
-#modal .box{background:#111;border:1px solid var(--border);border-radius:14px;padding:16px;width:min(600px,95vw)}
-</style>
+  <style>
+    :root{
+      --bg:#0a0a0a;
+      --text:#f3f4f6;
+      --muted:#a0adb8;
+      --border:rgba(255,255,255,.12);
+      --gold:#d8a23a;
+      --gold2:#ffd166;
+      --ok:#25d366;
+      --bad:#ff4d4d;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin: 24px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 15% 10%, rgba(216,162,58,.14), transparent 60%),
+        radial-gradient(900px 600px at 85% 30%, rgba(123,79,189,.10), transparent 55%),
+        var(--bg);
+    }
+
+    h1{ margin:0 0 10px; }
+    h2{ margin:0 0 10px; }
+    h3{ margin:12px 0 8px; color: rgba(243,244,246,.95); }
+
+    .small{ font-size: 12px; color: var(--muted); }
+    .mono{ font-family: var(--mono); }
+
+    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
+
+    .card{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: 0 14px 40px rgba(0,0,0,.45);
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: 140px 1fr;
+      gap:10px;
+      align-items:center;
+      margin: 8px 0;
+    }
+
+    input, select, textarea, button{
+      width:100%;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.28);
+      color: var(--text);
+      outline:none;
+    }
+    textarea{ resize: vertical; min-height: 70px; }
+
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(216,162,58,.55);
+      box-shadow: 0 0 0 6px rgba(216,162,58,.12);
+    }
+
+    button{
+      cursor:pointer;
+      font-weight: 950;
+      border-color: rgba(216,162,58,.65);
+      background: linear-gradient(135deg, rgba(255,209,102,.98), rgba(216,162,58,.85));
+      color:#121212;
+      box-shadow: 0 10px 22px rgba(0,0,0,.35);
+      transition: transform .14s ease, filter .14s ease, box-shadow .14s ease;
+    }
+    button:hover{
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+      box-shadow: 0 14px 32px rgba(0,0,0,.45);
+    }
+    button:active{ transform: translateY(0); filter: brightness(.98); }
+
+    .btns{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .pill{
+      display:inline-block;
+      padding: 2px 10px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      font-size:12px;
+      color: rgba(243,244,246,.86);
+      background: rgba(0,0,0,.22);
+    }
+    .ok{ color: var(--ok); font-weight: 900; }
+    .bad{ color: var(--bad); font-weight: 1000; }
+
+    table{ width:100%; border-collapse: collapse; margin-top:10px; }
+    th, td{ border-bottom: 1px solid rgba(255,255,255,.10); padding: 8px; text-align:left; vertical-align: top; }
+    th{ color: rgba(243,244,246,.85); font-size: 12px; }
+    tr:hover{ background: rgba(255,255,255,.04); }
+
+    a{ color: rgba(255,209,102,.95); text-decoration:none; font-weight: 950; }
+    a:hover{ text-decoration: underline; }
+
+    /* pulse add contact */
+    #btn_add.pulse{ animation: pulseAdd 1.2s ease-in-out infinite; }
+    @keyframes pulseAdd{
+      0%{ box-shadow: 0 0 0 0 rgba(216,162,58,.28); }
+      60%{ box-shadow: 0 0 0 14px rgba(216,162,58,0); transform: translateY(-2px); }
+      100%{ box-shadow: 0 0 0 0 rgba(216,162,58,0); transform: translateY(0); }
+    }
+
+    /* modal */
+    .modalBackdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.68);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 14px;
+    }
+    .modalBackdrop.show{ display:flex; }
+    .modalCard{
+      width: min(860px, 96vw);
+      max-height: min(82vh, 760px);
+      overflow: auto;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.65);
+    }
+    .modalHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      position: sticky;
+      top: 0;
+      background: rgba(0,0,0,.38);
+      backdrop-filter: blur(8px);
+      z-index: 2;
+    }
+    .modalHeader .title{
+      font-weight: 1000;
+      letter-spacing:.2px;
+      font-size: 12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .modalBody{
+      padding: 12px;
+      color: rgba(243,244,246,.95);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .modalBody h3{
+      margin: 12px 0 6px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing:.8px;
+      color: var(--muted);
+    }
+    .modalActions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .modalBtn{
+      width:auto;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(216,162,58,.65);
+      background: linear-gradient(135deg, rgba(255,209,102,.98), rgba(216,162,58,.85));
+      color:#121212;
+      font-weight: 1000;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+    }
+
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 980px){ .split{ grid-template-columns:1fr; } }
+
+    .warning{
+      border: 1px solid rgba(216,162,58,.35);
+      background: rgba(216,162,58,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 
 <body>
+  <h1>📇 Archivio Contatti + 📩 Volantini</h1>
+  <div class="small">Dati salvati localmente nel browser. Nessun reset in UI.</div>
 
-<h1>📇 Archivio Contatti (dati = ORO)</h1>
+  <div class="grid" style="margin-top:16px;">
+    <div class="card">
+      <h2>Contatti</h2>
 
-<div class="card">
-  <input id="c_id" placeholder="ID automatico">
-  <input id="c_nome" placeholder="Nome">
-  <input id="c_tel" placeholder="Telefono">
-  <input id="c_addr" placeholder="Indirizzo">
-  <button id="btn_add">Aggiungi contatto</button>
-  <div id="msg"></div>
-</div>
+      <div class="row">
+        <div>ID contatto</div>
+        <input id="c_id" placeholder="(automatico: C001, C002…)" />
+      </div>
+      <div class="row">
+        <div>Nome</div>
+        <input id="c_nome" placeholder="es. Mario Rossi" />
+      </div>
+      <div class="row">
+        <div>Telefono</div>
+        <input id="c_tel" placeholder="es. 3331234567" />
+      </div>
+      <div class="row">
+        <div>Indirizzo</div>
+        <input id="c_addr" placeholder="es. Via Roma 10" />
+      </div>
 
-<div class="card">
-  <h3>Contatti</h3>
-  <table>
-    <thead><tr><th>ID</th><th>Nome</th><th>Telefono</th></tr></thead>
-    <tbody id="table"></tbody>
-  </table>
-</div>
+      <div class="btns" style="margin-top:10px;">
+        <button id="btn_add">Aggiungi contatto</button>
+        <button id="btn_select">Seleziona contatto</button>
+      </div>
 
-<div id="modal">
-  <div class="box">
-    <h3>📞 Come contattarlo</h3>
-    <div id="modalBody"></div>
-    <br>
-    <button onclick="closeModal()">Chiudi</button>
+      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+        <span class="pill">Selezionato: <span id="selected_id" class="mono">—</span></span>
+      </div>
+
+      <div id="msg" style="margin-top:10px;"></div>
+
+      <h3>Lista contatti</h3>
+      <div id="contacts_table"></div>
+    </div>
+
+    <div class="card">
+      <h2>Volantino del mese</h2>
+
+      <div class="split">
+        <div>
+          <div class="small">Titolo volantino</div>
+          <input id="fly_title" placeholder="es. Promo Febbraio 2026" />
+        </div>
+        <div>
+          <div class="small">Mese di invio</div>
+          <input id="fly_month" type="month" />
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="small">Carica volantino (PDF/immagine)</div>
+        <input id="fly_file" type="file" accept="application/pdf,image/*" />
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="small">Note (opzionale)</div>
+        <textarea id="fly_note" placeholder="es. Valido fino al 28/02, sconti su..."></textarea>
+      </div>
+
+      <div class="btns" style="margin-top:10px;">
+        <button id="btn_fly_save">Salva in archivio</button>
+        <button id="btn_fly_preview">Apri/Preview</button>
+      </div>
+
+      <div class="btns" style="margin-top:10px;">
+        <button id="btn_fly_whatsapp">Invia tramite WhatsApp</button>
+        <button id="btn_fly_copy">Copia testo WhatsApp</button>
+      </div>
+
+      <div class="warning small">
+        WhatsApp non permette di allegare automaticamente file via link: il bottone apre la chat con testo pronto, poi alleghi il volantino manualmente.
+      </div>
+
+      <h3>Archivio volantini</h3>
+      <div id="fly_list" class="small">—</div>
+    </div>
   </div>
-</div>
+
+  <!-- MODAL contatto -->
+  <div class="modalBackdrop" id="contactModal" aria-hidden="true">
+    <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
+      <div class="modalHeader">
+        <div class="title" id="contactTitle">📇 Contatto selezionato</div>
+        <button class="modalBtn" id="btnCloseContactModal" type="button">✕ Chiudi</button>
+      </div>
+      <div class="modalBody" id="contactModalBody"></div>
+    </div>
+  </div>
 
 <script>
-const KEY="ARCHIVIO_CONTATTI_ORO";
-const data=JSON.parse(localStorage.getItem(KEY)||"{}");
-function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+/* ========= PERSISTENZA ========= */
+const LS_KEY = "procedure_contacts_v2";
+const LS_FLY_META = "flyers_meta_v1";
 
-function nextId(){
-  const n=Object.keys(data).length+1;
-  return "C"+String(n).padStart(3,"0");
+/* ========= CONTATTI ========= */
+const pc = { contacts: loadContacts() };
+let selectedId = null;
+
+/* helpers */
+const $ = (sel) => document.querySelector(sel);
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function escapeAttr(s){ return escapeHtml(s).replace(/"/g, '&quot;'); }
+function setMsg(text, ok=true){
+  $("#msg").innerHTML = ok ? `<div class="ok">✅ ${escapeHtml(text)}</div>` : `<div class="bad">⛔ ${escapeHtml(text)}</div>`;
 }
 
-btn_add.onclick=()=>{
-  const id=c_id.value.trim()||nextId();
-  data[id]={id,nome:c_nome.value||"—",tel:c_tel.value||"",addr:c_addr.value||""};
-  c_id.value=id;c_nome.value=c_tel.value=c_addr.value="";
-  save();render();
-  msg.innerHTML=`<div class="ok">Salvato ${id}</div>`;
-};
+/* ID automatico C001, C002... */
+function nextContactId(){
+  const ids = Object.keys(pc.contacts || {});
+  let max = 0;
+  ids.forEach(id=>{
+    const m = String(id).match(/^C(\d+)$/i);
+    if(m) max = Math.max(max, parseInt(m[1],10));
+  });
+  return "C" + String(max + 1).padStart(3,"0");
+}
 
-["c_nome","c_tel","c_addr"].forEach(id=>{
-  document.getElementById(id).oninput=()=>{
-    btn_add.classList.toggle("pulse",c_nome.value||c_tel.value||c_addr.value);
+function makeContactFromInputs(){
+  let id = $("#c_id").value.trim();
+  if(!id){
+    id = nextContactId();
+    $("#c_id").value = id;
   }
+  return {
+    id,
+    nome: $("#c_nome").value.trim() || "—",
+    telefono: $("#c_tel").value.trim() || "",
+    indirizzo: $("#c_addr").value.trim() || ""
+  };
+}
+
+function saveContacts(){
+  localStorage.setItem(LS_KEY, JSON.stringify({ contacts: pc.contacts, selectedId }));
+}
+function loadContacts(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return {};
+    const data = JSON.parse(raw);
+    selectedId = data.selectedId || null;
+    return data.contacts || {};
+  }catch{ return {}; }
+}
+
+/* pulse add */
+function updateAddPulse(){
+  const nome = $("#c_nome").value.trim();
+  const tel  = $("#c_tel").value.trim();
+  const addr = $("#c_addr").value.trim();
+  const shouldPulse = (nome || tel || addr) && !selectedId;
+  $("#btn_add").classList.toggle("pulse", !!shouldPulse);
+}
+["#c_nome","#c_tel","#c_addr","#c_id"].forEach(sel=>{
+  const el = $(sel);
+  if(el) el.addEventListener("input", updateAddPulse);
 });
 
-function render(){
-  table.innerHTML="";
-  Object.values(data).forEach(c=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${c.id}</td><td>${c.nome}</td><td>${c.tel}</td>`;
-    tr.onclick=()=>openModal(c);
-    table.appendChild(tr);
+/* render contacts */
+function renderContacts(){
+  const rows = Object.values(pc.contacts)
+    .sort((a,b)=>a.id.localeCompare(b.id))
+    .map(c => `
+      <tr>
+        <td><a href="#" data-id="${escapeAttr(c.id)}">${escapeHtml(c.id)}</a></td>
+        <td>${escapeHtml(c.nome || "—")}</td>
+        <td class="mono">${escapeHtml(c.telefono || "—")}</td>
+        <td>${escapeHtml(c.indirizzo || "—")}</td>
+      </tr>
+    `).join("");
+
+  $("#contacts_table").innerHTML = `
+    <table>
+      <thead><tr><th>ID</th><th>Nome</th><th>Telefono</th><th>Indirizzo</th></tr></thead>
+      <tbody>${rows || `<tr><td colspan="4" class="small">Nessun contatto ancora.</td></tr>`}</tbody>
+    </table>
+  `;
+
+  document.querySelectorAll('a[data-id]').forEach(a=>{
+    a.onclick = (ev)=>{ ev.preventDefault(); selectContact(a.dataset.id); };
   });
 }
-function openModal(c){
-  modalBody.innerHTML=`
-    <div><b>Nome:</b> ${c.nome}</div>
-    <div><b>Telefono:</b> ${c.tel||"—"}</div>
-    <div><b>Indirizzo:</b> ${c.addr||"—"}</div>
-    <br>
-    <a href="tel:${c.tel}">📞 Chiama</a> |
-    <a target="_blank" href="https://wa.me/${c.tel.replace(/\D/g,"")}">🟢 WhatsApp</a>
-  `;
-  modal.style.display="flex";
+
+/* select + modal */
+function selectContact(id){
+  if(!pc.contacts[id]) throw new Error("Contatto non trovato: " + id);
+  selectedId = id;
+  $("#selected_id").textContent = id;
+  saveContacts();
+  updateAddPulse();
+  openContactModal(pc.contacts[id]);
 }
-function closeModal(){modal.style.display="none"}
-render();
+
+/* modal */
+function openContactModal(c){
+  const telRaw = String(c.telefono || "").trim();
+  const telDigits = telRaw.replace(/\D/g,"");
+  const telLink = telDigits ? `tel:${telDigits}` : "";
+  const waLink  = telDigits ? `https://wa.me/${telDigits}` : "";
+
+  $("#contactModalBody").innerHTML = `
+    <h3>Come contattarlo</h3>
+    <div class="pill">Telefono: <span class="mono">${escapeHtml(telRaw || "—")}</span></div>
+
+    <div class="modalActions">
+      <a class="modalBtn" href="${escapeAttr(telLink)}" ${telDigits ? "" : "onclick='return false'"}>📞 Chiama</a>
+      <a class="modalBtn" href="${escapeAttr(waLink)}" target="_blank" rel="noopener" ${telDigits ? "" : "onclick='return false'"}>🟢 WhatsApp</a>
+    </div>
+
+    <h3>Dettagli</h3>
+    <div class="pill">ID: <span class="mono">${escapeHtml(c.id)}</span></div>
+    <div style="margin-top:8px;"><b>Nome:</b> ${escapeHtml(c.nome || "—")}</div>
+    <div style="margin-top:6px;"><b>Indirizzo:</b> ${escapeHtml(c.indirizzo || "—")}</div>
+  `;
+  $("#contactModal").classList.add("show");
+  $("#contactModal").setAttribute("aria-hidden","false");
+}
+function closeContactModal(){
+  $("#contactModal").classList.remove("show");
+  $("#contactModal").setAttribute("aria-hidden","true");
+}
+$("#btnCloseContactModal").onclick = closeContactModal;
+$("#contactModal").addEventListener("click", (e)=>{
+  if(e.target && e.target.id === "contactModal") closeContactModal();
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape") closeContactModal();
+});
+
+/* buttons */
+$("#btn_add").onclick = ()=>{
+  try{
+    const c = makeContactFromInputs();
+    pc.contacts[c.id] = c;
+    saveContacts();
+    renderContacts();
+    setMsg("Contatto aggiunto: " + c.id, true);
+    // clear inputs except id
+    $("#c_nome").value = "";
+    $("#c_tel").value = "";
+    $("#c_addr").value = "";
+    $("#c_id").value = "";
+    updateAddPulse();
+  }catch(e){ setMsg(e.message || String(e), false); }
+};
+
+$("#btn_select").onclick = ()=>{
+  try{
+    const id = $("#c_id").value.trim();
+    if(!id) throw new Error("Inserisci un ID (es. C001) o clicca un contatto in tabella.");
+    selectContact(id);
+    setMsg("Contatto selezionato: " + id, true);
+  }catch(e){ setMsg(e.message || String(e), false); }
+};
+
+/* ========= VOLANTINI (IndexedDB per salvare file) ========= */
+const DB_NAME = "flyers_db_v1";
+const STORE = "flyers";
+
+function openDB(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = (e)=>{
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains(STORE)){
+        db.createObjectStore(STORE, { keyPath: "id" });
+      }
+    };
+    req.onsuccess = ()=> resolve(req.result);
+    req.onerror = ()=> reject(req.error);
+  });
+}
+
+async function dbPutFlyer(item){
+  const db = await openDB();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(STORE, "readwrite");
+    tx.objectStore(STORE).put(item);
+    tx.oncomplete = ()=> resolve(true);
+    tx.onerror = ()=> reject(tx.error);
+  });
+}
+
+async function dbGetFlyer(id){
+  const db = await openDB();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(STORE, "readonly");
+    const req = tx.objectStore(STORE).get(id);
+    req.onsuccess = ()=> resolve(req.result || null);
+    req.onerror = ()=> reject(req.error);
+  });
+}
+
+async function dbGetAllFlyers(){
+  const db = await openDB();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(STORE, "readonly");
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = ()=> resolve(req.result || []);
+    req.onerror = ()=> reject(req.error);
+  });
+}
+
+function flyerId(){
+  return "F" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+function fmtMonth(ym){
+  if(!ym) return "—";
+  const [y,m] = ym.split("-");
+  return `${m}/${y}`;
+}
+
+function currentFlyerMessage(contact){
+  const c = contact || (selectedId ? pc.contacts[selectedId] : null);
+  const name = c?.nome && c.nome !== "—" ? c.nome : "ciao";
+  const meta = getSelectedFlyerMeta();
+  const title = meta?.title || "Volantino";
+  const month = meta?.month ? fmtMonth(meta.month) : "";
+  const note = meta?.note ? `\n\nNote: ${meta.note}` : "";
+  return `Ciao ${name}! 👋\nTi mando il ${title}${month ? " ("+month+")" : ""}.${note}\n\n(Allego il volantino qui in chat)`;
+}
+
+function saveFlyerMetaList(list){
+  localStorage.setItem(LS_FLY_META, JSON.stringify(list));
+}
+function loadFlyerMetaList(){
+  try{
+    const raw = localStorage.getItem(LS_FLY_META);
+    return raw ? JSON.parse(raw) : [];
+  }catch{ return []; }
+}
+
+let flyersMeta = loadFlyerMetaList(); // [{id,title,month,note,filename,mime,createdAt}]
+let selectedFlyerId = flyersMeta[0]?.id || null;
+
+function getSelectedFlyerMeta(){
+  if(!selectedFlyerId) return null;
+  return flyersMeta.find(x=>x.id === selectedFlyerId) || null;
+}
+
+function renderFlyers(){
+  if(!flyersMeta.length){
+    $("#fly_list").innerHTML = "—";
+    return;
+  }
+  const rows = flyersMeta
+    .slice()
+    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))
+    .map(f=>{
+      const isSel = f.id === selectedFlyerId;
+      return `
+        <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.08);">
+          <div style="min-width:0;">
+            <div style="font-weight:950; ${isSel ? "color: var(--gold2);" : ""}">${escapeHtml(f.title || "Volantino")}</div>
+            <div class="small">Mese: <span class="mono">${escapeHtml(fmtMonth(f.month))}</span> • File: <span class="mono">${escapeHtml(f.filename || "—")}</span></div>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="modalBtn" data-sel="${escapeAttr(f.id)}" type="button">Seleziona</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+  $("#fly_list").innerHTML = rows;
+
+  document.querySelectorAll("[data-sel]").forEach(btn=>{
+    btn.onclick = ()=>{
+      selectedFlyerId = btn.getAttribute("data-sel");
+      renderFlyers();
+    };
+  });
+}
+
+$("#btn_fly_save").onclick = async ()=>{
+  try{
+    const title = $("#fly_title").value.trim() || "Volantino";
+    const month = $("#fly_month").value || "";
+    const note = $("#fly_note").value.trim() || "";
+    const file = $("#fly_file").files?.[0];
+    if(!file) throw new Error("Carica un file volantino (PDF o immagine).");
+
+    const id = flyerId();
+    const blob = file; // File è già un Blob
+    const mime = file.type || "application/octet-stream";
+    const filename = file.name || "volantino";
+
+    await dbPutFlyer({ id, blob, mime, filename, createdAt: Date.now() });
+
+    const meta = { id, title, month, note, mime, filename, createdAt: Date.now() };
+    flyersMeta.push(meta);
+    saveFlyerMetaList(flyersMeta);
+    selectedFlyerId = id;
+
+    // reset input file (così puoi ricaricare lo stesso file se vuoi)
+    $("#fly_file").value = "";
+    setMsg("Volantino salvato in archivio ✅", true);
+    renderFlyers();
+  }catch(e){
+    setMsg(e.message || String(e), false);
+  }
+};
+
+$("#btn_fly_preview").onclick = async ()=>{
+  try{
+    const meta = getSelectedFlyerMeta();
+    if(!meta) throw new Error("Nessun volantino selezionato.");
+    const rec = await dbGetFlyer(meta.id);
+    if(!rec?.blob) throw new Error("File non trovato in archivio (IndexedDB).");
+
+    const url = URL.createObjectURL(rec.blob);
+    window.open(url, "_blank", "noopener");
+    // non revoco subito, altrimenti la tab può perdere il file
+    setTimeout(()=> URL.revokeObjectURL(url), 60_000);
+  }catch(e){
+    setMsg(e.message || String(e), false);
+  }
+};
+
+$("#btn_fly_copy").onclick = async ()=>{
+  try{
+    const text = currentFlyerMessage(selectedId ? pc.contacts[selectedId] : null);
+    await navigator.clipboard.writeText(text);
+    setMsg("Testo WhatsApp copiato ✅", true);
+  }catch(e){
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = currentFlyerMessage(selectedId ? pc.contacts[selectedId] : null);
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+    setMsg("Testo WhatsApp copiato ✅", true);
+  }
+};
+
+$("#btn_fly_whatsapp").onclick = ()=>{
+  try{
+    if(!selectedId) throw new Error("Seleziona prima un contatto (così il messaggio ha nome/numero).");
+    const c = pc.contacts[selectedId];
+    const telDigits = String(c.telefono || "").replace(/\D/g,"");
+    if(!telDigits) throw new Error("Il contatto non ha un numero valido.");
+    const msg = currentFlyerMessage(c);
+    const url = `https://wa.me/${telDigits}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank", "noopener");
+    setMsg("WhatsApp aperto: incolla/allega il volantino nella chat ✅", true);
+  }catch(e){
+    setMsg(e.message || String(e), false);
+  }
+};
+
+/* init */
+renderContacts();
+renderFlyers();
+updateAddPulse();
+
+/* se avevi un selectedId salvato */
+try{
+  const raw = localStorage.getItem(LS_KEY);
+  if(raw){
+    const data = JSON.parse(raw);
+    if(data.selectedId && pc.contacts[data.selectedId]){
+      selectedId = data.selectedId;
+      $("#selected_id").textContent = selectedId;
+    }
+  }
+}catch{}
 </script>
 </body>
 </html>
