@@ -1,223 +1,806 @@
- <!DOCTYPE html>
+<!doctype html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<title>Gestione Contatti – Dark Gold</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Agente Operativo – Controllo Procedura</title>
 
-<style>
-:root{
-  --bg:#0a0a0a;
-  --card:#121212;
-  --gold:#d8a23a;
-  --gold-soft:rgba(216,162,58,.25);
-  --text:#f5f5f5;
-  --muted:#9aa0a6;
-  --border:rgba(255,255,255,.12);
-}
+  <style>
+    :root{
+      --bg:#0a0a0a;
+      --text:#f3f4f6;
+      --muted:#a0adb8;
+      --card:rgba(255,255,255,.04);
+      --border:rgba(255,255,255,.12);
+      --gold:#d8a23a;
+      --gold2:#ffd166;
+      --ok:#25d366;
+      --bad:#ff4d4d;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
 
-*{ box-sizing:border-box; }
+    *{ box-sizing:border-box; }
 
-body{
-  margin:0;
-  padding:20px;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  background:var(--bg);
-  color:var(--text);
-}
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 24px;
+      line-height: 1.35;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 15% 10%, rgba(216,162,58,.14), transparent 60%),
+        radial-gradient(900px 600px at 85% 30%, rgba(123,79,189,.10), transparent 55%),
+        var(--bg);
+    }
 
-h1{ margin:0 0 10px; }
+    h1 { margin: 0 0 12px; }
+    h2{ margin:0 0 10px; }
 
-.card{
-  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-  margin-bottom:14px;
-}
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-label{ font-size:12px; color:var(--muted); }
+    .card{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: 0 14px 40px rgba(0,0,0,.45);
+    }
 
-input, textarea, select{
-  width:100%;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:rgba(0,0,0,.35);
-  color:var(--text);
-}
+    .row{
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 10px;
+      align-items: center;
+      margin: 8px 0;
+    }
 
-textarea{ resize:vertical; }
+    input, select, button, textarea{
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.28);
+      color: var(--text);
+      outline: none;
+    }
 
-button{
-  cursor:pointer;
-  border-radius:12px;
-  padding:10px 14px;
-  font-weight:900;
-  border:1px solid var(--gold);
-  background:linear-gradient(180deg,#f5d27a,#d8a23a);
-  color:#000;
-}
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(216,162,58,.55);
+      box-shadow: 0 0 0 6px rgba(216,162,58,.12);
+    }
 
-button.ghost{
-  background:transparent;
-  color:var(--gold);
-}
+    textarea { min-height: 70px; resize: vertical; }
 
-button:hover{ filter:brightness(1.1); }
+    button{
+      cursor: pointer;
+      font-weight: 950;
+      border-color: rgba(216,162,58,.65);
+      background: linear-gradient(135deg, rgba(255,209,102,.98), rgba(216,162,58,.85));
+      color: #121212;
+      box-shadow: 0 10px 22px rgba(0,0,0,.35);
+      transition: transform .14s ease, filter .14s ease, box-shadow .14s ease;
+    }
+    button:hover{
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+      box-shadow: 0 14px 32px rgba(0,0,0,.45);
+    }
+    button:active{ transform: translateY(0); filter: brightness(.98); }
 
-#btnAdd.pulse{
-  animation:pulse 1.2s infinite;
-}
-@keyframes pulse{
-  0%{ box-shadow:0 0 0 0 var(--gold-soft); }
-  70%{ box-shadow:0 0 0 14px transparent; }
-  100%{ box-shadow:0 0 0 0 transparent; }
-}
+    .btns{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-th,td{
-  padding:8px;
-  border-bottom:1px solid var(--border);
-}
-tr:hover{ background:rgba(255,255,255,.04); cursor:pointer; }
+    .small{ font-size: 12px; color: var(--muted); }
+    .ok{ color: var(--ok); font-weight: 900; }
+    .bad{ color: var(--bad); font-weight: 1000; }
 
-.pill{
-  display:inline-block;
-  padding:4px 10px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  font-size:12px;
-  color:var(--muted);
-}
+    table{ width:100%; border-collapse: collapse; margin-top:10px; }
+    th, td{ border-bottom: 1px solid rgba(255,255,255,.10); padding: 8px; text-align:left; vertical-align: top; }
+    th{ color: rgba(243,244,246,.85); font-size: 12px; }
 
-/* MODAL */
-#modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
-}
-#modal .box{
-  width:min(600px,95vw);
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:16px;
-}
-</style>
+    .pill{
+      display:inline-block;
+      padding: 2px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px;
+      color: rgba(243,244,246,.86);
+      background: rgba(0,0,0,.22);
+    }
+
+    .footer{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
+    .mono{ font-family: var(--mono); }
+
+    a{ color: rgba(255,209,102,.95); text-decoration:none; font-weight: 950; }
+    a:hover{ text-decoration: underline; }
+
+    /* Pulsazione bottone Aggiungi */
+    #btn_add.pulse{
+      animation: pulseAdd 1.2s ease-in-out infinite;
+    }
+    @keyframes pulseAdd{
+      0%{ box-shadow: 0 0 0 0 rgba(216,162,58,.28); }
+      60%{ box-shadow: 0 0 0 14px rgba(216,162,58,0); transform: translateY(-2px); }
+      100%{ box-shadow: 0 0 0 0 rgba(216,162,58,0); transform: translateY(0); }
+    }
+
+    /* MODAL contatto */
+    .modalBackdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.68);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 14px;
+    }
+    .modalBackdrop.show{ display:flex; }
+
+    .modalCard{
+      width: min(860px, 96vw);
+      max-height: min(82vh, 760px);
+      overflow: auto;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.65);
+    }
+
+    .modalHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      position: sticky;
+      top: 0;
+      background: rgba(0,0,0,.38);
+      backdrop-filter: blur(8px);
+      z-index: 2;
+    }
+
+    .modalHeader .title{
+      font-weight: 1000;
+      letter-spacing:.2px;
+      font-size: 12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .modalBody{
+      padding: 12px;
+      color: rgba(243,244,246,.95);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .modalBody h3{
+      margin: 12px 0 6px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing:.8px;
+      color: var(--muted);
+    }
+
+    .modalActions{
+      display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;
+    }
+
+    .modalBtn{
+      width:auto;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(216,162,58,.65);
+      background: linear-gradient(135deg, rgba(255,209,102,.98), rgba(216,162,58,.85));
+      color:#121212;
+      font-weight: 1000;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+  </style>
 </head>
 
 <body>
-
-<h1>📇 Gestione Contatti</h1>
-
-<div class="card">
-  <label>ID (automatico)</label>
-  <input id="c_id" placeholder="Automatico" disabled>
-
-  <label>Nome</label>
-  <input id="c_nome" placeholder="Mario Rossi">
-
-  <label>Telefono</label>
-  <input id="c_tel" placeholder="+39...">
-
-  <label>Indirizzo</label>
-  <input id="c_addr" placeholder="Via Roma 1">
-
-  <button id="btnAdd">➕ Aggiungi contatto</button>
-</div>
-
-<div class="card">
-  <h3>Contatti</h3>
-  <table>
-    <thead>
-      <tr><th>ID</th><th>Nome</th><th>Telefono</th></tr>
-    </thead>
-    <tbody id="contactTable"></tbody>
-  </table>
-</div>
-
-<!-- MODAL -->
-<div id="modal">
-  <div class="box">
-    <h3>📞 Come contattarlo</h3>
-    <div id="modalBody"></div>
-    <br>
-    <button class="ghost" onclick="closeModal()">✕ Chiudi</button>
+  <h1>Agente Operativo – Controllo Procedura</h1>
+  <div class="small">
+    Workflow rigido: stati, regole di disciplina, blocchi (non si “salta avanti”), KPI giornalieri.
   </div>
-</div>
+
+  <div class="grid" style="margin-top:16px;">
+    <div class="card">
+      <h2>1) Crea / Seleziona contatto</h2>
+
+      <div class="row">
+        <div>ID contatto</div>
+        <input id="c_id" placeholder="(automatico: C001, C002…)" />
+      </div>
+      <div class="row">
+        <div>Nome</div>
+        <input id="c_nome" placeholder="es. Mario Rossi" />
+      </div>
+      <div class="row">
+        <div>Telefono</div>
+        <input id="c_tel" placeholder="es. 3331234567" />
+      </div>
+      <div class="row">
+        <div>Indirizzo</div>
+        <input id="c_addr" placeholder="es. Via Roma 10" />
+      </div>
+
+      <div class="btns" style="margin-top:10px;">
+        <button id="btn_add">Aggiungi contatto</button>
+        <button id="btn_select">Seleziona contatto</button>
+      </div>
+
+      <div class="footer">
+        <span class="pill">Selezionato: <span id="selected_id" class="mono">—</span></span>
+        <span class="pill">Stato: <span id="selected_stage" class="mono">—</span></span>
+        <span class="pill">Rimandi: <span id="selected_postpone" class="mono">0</span></span>
+      </div>
+
+      <div id="msg" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>2) Azioni (disciplina)</h2>
+
+      <h3 style="margin:10px 0 6px;">A) Log tentativo</h3>
+      <div class="row">
+        <div>Canale</div>
+        <select id="a_channel">
+          <option value="citofono">citofono</option>
+          <option value="telefono">telefono</option>
+          <option value="cartello">cartello</option>
+          <option value="database">database</option>
+        </select>
+      </div>
+      <div class="row">
+        <div>Esito</div>
+        <select id="a_outcome">
+          <option value="no_risposta">no_risposta</option>
+          <option value="rifiuto">rifiuto</option>
+          <option value="conversazione">conversazione</option>
+          <option value="richiamare">richiamare</option>
+        </select>
+      </div>
+      <div class="row">
+        <div>Note</div>
+        <input id="a_notes" placeholder="es. Scala A, proprietario cordiale..." />
+      </div>
+      <button id="btn_attempt">Registra tentativo</button>
+
+      <hr style="margin:14px 0; border:none; border-top:1px solid rgba(255,255,255,.10);" />
+
+      <h3 style="margin:10px 0 6px;">B) Qualifica (obbligatoria)</h3>
+      <div class="row">
+        <div>Motivo</div>
+        <input id="q_motivo" placeholder="es. trasferimento / eredità / cambio casa" />
+      </div>
+      <div class="row">
+        <div>Tempi</div>
+        <input id="q_tempi" placeholder="es. entro 3 mesi" />
+      </div>
+      <div class="row">
+        <div>Prezzo atteso</div>
+        <input id="q_prezzo" placeholder="es. 250-270k" />
+      </div>
+      <div class="row">
+        <div>JTBD</div>
+        <select id="q_jtbd">
+          <option value="">— seleziona —</option>
+          <option value="confusione_valore">confusione_valore</option>
+          <option value="paura_errori">paura_errori</option>
+          <option value="tempistiche">tempistiche</option>
+          <option value="burocrazia_blocco">burocrazia_blocco</option>
+          <option value="solo_curiosita">solo_curiosita</option>
+        </select>
+      </div>
+      <button id="btn_qualify">Salva qualifica</button>
+
+      <hr style="margin:14px 0; border:none; border-top:1px solid rgba(255,255,255,.10);" />
+
+      <h3 style="margin:10px 0 6px;">C) Appuntamento / Rimandi / Scarto</h3>
+      <div class="row">
+        <div>Data appunt.</div>
+        <input id="appt_when" type="datetime-local" />
+      </div>
+      <div class="btns">
+        <button id="btn_appt">Fissa appuntamento</button>
+        <button id="btn_postpone">Segna rimando</button>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <div>Motivo scarto</div>
+        <input id="discard_reason" placeholder="es. non collaborativo / solo prezzo / fake lead" />
+      </div>
+      <button id="btn_discard">Scarta contatto</button>
+
+      <div class="small" style="margin-top:10px;">
+        Regole attive: non puoi fissare appuntamento se mancano motivo/tempi/prezzo/JTBD. Dopo 3 rimandi → PAUSA 14 giorni.
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:16px;">
+    <div class="card">
+      <h2>3) Lista contatti</h2>
+      <div class="small">Click su un contatto per selezionarlo.</div>
+      <div id="contacts_table"></div>
+    </div>
+
+    <div class="card">
+      <h2>4) KPI di oggi</h2>
+      <div class="btns">
+        <button id="btn_kpi">Calcola KPI</button>
+        <button id="btn_reset">Reset dati (solo in browser)</button>
+      </div>
+      <div id="kpi_box" style="margin-top:10px;"></div>
+
+      <h3 style="margin:14px 0 6px;">Log tentativi (contatto selezionato)</h3>
+      <div id="attempts_box"></div>
+    </div>
+  </div>
+
+  <!-- MODAL CONTATTO -->
+  <div class="modalBackdrop" id="contactModal" aria-hidden="true">
+    <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
+      <div class="modalHeader">
+        <div class="title" id="contactTitle">📇 Contatto selezionato</div>
+        <button class="modalBtn" id="btnCloseContactModal" type="button">✕ Chiudi</button>
+      </div>
+      <div class="modalBody" id="contactModalBody"></div>
+    </div>
+  </div>
 
 <script>
-const contacts = {};
-let selectedId = null;
+/** ====== “Controller” in JS ====== **/
 
-/* ID automatico */
-function nextId(){
-  let n = Object.keys(contacts).length + 1;
-  return "C" + String(n).padStart(3,"0");
-}
-
-/* Render tabella */
-function render(){
-  const tb = document.getElementById("contactTable");
-  tb.innerHTML = "";
-  Object.values(contacts).forEach(c=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${c.id}</td><td>${c.nome}</td><td>${c.tel}</td>`;
-    tr.onclick = ()=>selectContact(c.id);
-    tb.appendChild(tr);
-  });
-}
-
-/* Aggiungi */
-document.getElementById("btnAdd").onclick = ()=>{
-  const id = nextId();
-  const nome = c_nome.value.trim() || "—";
-  const tel  = c_tel.value.trim() || "";
-  const addr = c_addr.value.trim() || "";
-  contacts[id] = {id,nome,tel,addr,log:[]};
-  c_nome.value = c_tel.value = c_addr.value = "";
-  render();
-};
-
-/* Animazione bottone */
-["c_nome","c_tel","c_addr"].forEach(id=>{
-  document.getElementById(id).addEventListener("input",()=>{
-    btnAdd.classList.toggle("pulse", c_nome.value||c_tel.value||c_addr.value);
-  });
+const Stage = Object.freeze({
+  NUOVO: "NUOVO",
+  CONTATTATO: "CONTATTATO",
+  QUALIFICATO: "QUALIFICATO",
+  APPUNTAMENTO_FISSATO: "APPUNTAMENTO_FISSATO",
+  VALUTAZIONE_FATTA: "VALUTAZIONE_FATTA",
+  PROPOSTA_INCARICO: "PROPOSTA_INCARICO",
+  ACQUISITO: "ACQUISITO",
+  PAUSA: "PAUSA",
+  SCARTATO: "SCARTATO"
 });
 
-/* Seleziona contatto */
-function selectContact(id){
-  const c = contacts[id];
-  selectedId = id;
-  openModal(c);
+class DisciplineError extends Error {}
+
+function nowISO() { return new Date().toISOString(); }
+function addDays(date, days) { const d = new Date(date); d.setDate(d.getDate() + days); return d; }
+
+function startOfDay(d) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
+function endOfDay(d) { const x = startOfDay(d); x.setDate(x.getDate() + 1); return x; }
+
+class ProcedureController {
+  constructor() { this.contacts = {}; }
+
+  addContact(c) { this.contacts[c.id] = c; }
+
+  get(id) {
+    const c = this.contacts[id];
+    if (!c) throw new Error("Contatto non trovato: " + id);
+    return c;
+  }
+
+  logAttempt(id, channel, outcome, notes="") {
+    const c = this.get(id);
+    c.attempts.push({ when: nowISO(), channel, outcome, notes });
+    if (outcome === "conversazione" && c.stage === Stage.NUOVO) c.stage = Stage.CONTATTATO;
+  }
+
+  setQualification(id, motivo, tempi, prezzo_atteso, jtbd) {
+    const c = this.get(id);
+    c.qualification = { motivo, tempi, prezzo_atteso, jtbd };
+    c.stage = Stage.QUALIFICATO;
+  }
+
+  scheduleAppointment(id, whenISO) {
+    const c = this.get(id);
+    this.assertCanSchedule(c);
+    c.stage = Stage.APPUNTAMENTO_FISSATO;
+    c.appointment_when = whenISO || null;
+  }
+
+  markPostponed(id, reason="") {
+    const c = this.get(id);
+    c.postpone_count += 1;
+    c.last_postpone_reason = reason;
+    if (c.postpone_count >= 3) {
+      c.stage = Stage.PAUSA;
+      c.pause_until = addDays(new Date(), 14).toISOString();
+    }
+  }
+
+  discard(id, reason) {
+    const c = this.get(id);
+    c.stage = Stage.SCARTATO;
+    c.discarded_reason = reason || "—";
+  }
+
+  assertCanSchedule(c) {
+    const q = c.qualification || {};
+    const missing = [];
+    if (!q.motivo) missing.push("motivo");
+    if (!q.tempi) missing.push("tempi");
+    if (!q.prezzo_atteso) missing.push("prezzo_atteso");
+    if (!q.jtbd) missing.push("jtbd");
+
+    if (missing.length) throw new DisciplineError("Non puoi fissare appuntamento, mancano: " + missing.join(", "));
+
+    if (![Stage.CONTATTATO, Stage.QUALIFICATO].includes(c.stage)) {
+      throw new DisciplineError("Stato attuale " + c.stage + ", avanzamento non consentito");
+    }
+
+    if (c.stage === Stage.PAUSA && c.pause_until) {
+      const until = new Date(c.pause_until);
+      if (new Date() < until) throw new DisciplineError("Contatto in PAUSA fino a: " + until.toLocaleString());
+    }
+  }
+
+  dailyKPI(date = new Date()) {
+    const s = startOfDay(date);
+    const e = endOfDay(date);
+    let attempts = 0, conversations = 0, appointments = 0, contacts = 0;
+
+    for (const c of Object.values(this.contacts)) {
+      contacts += 1;
+      for (const a of c.attempts) {
+        const t = new Date(a.when);
+        if (t >= s && t < e) {
+          attempts += 1;
+          if (a.outcome === "conversazione") conversations += 1;
+        }
+      }
+      if (c.stage === Stage.APPUNTAMENTO_FISSATO) appointments += 1;
+    }
+
+    return { contacts, attempts, conversations, appointments };
+  }
 }
 
-/* Modal */
-function openModal(c){
-  const telClean = c.tel.replace(/\D/g,"");
-  modalBody.innerHTML = `
-    <p><b>ID:</b> ${c.id}</p>
-    <p><b>Nome:</b> ${c.nome}</p>
-    <p><b>Telefono:</b> ${c.tel || "—"}</p>
-    <p><b>Indirizzo:</b> ${c.addr || "—"}</p>
-    <br>
-    <a href="tel:${telClean}" class="pill">📞 Chiama</a>
-    <a href="https://wa.me/${telClean}" target="_blank" class="pill">🟢 WhatsApp</a>
+/** ====== UI glue ====== **/
+
+const pc = loadState() || new ProcedureController();
+let selectedId = null;
+
+/* helpers */
+function $(sel){ return document.querySelector(sel); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function escapeAttr(s){ return escapeHtml(s).replace(/"/g, '&quot;'); }
+
+/* ID automatico: C001, C002... */
+function nextContactId(){
+  const ids = Object.keys(pc.contacts || {});
+  let max = 0;
+  ids.forEach(id=>{
+    const m = String(id).match(/^C(\d+)$/i);
+    if(m) max = Math.max(max, parseInt(m[1], 10));
+  });
+  return "C" + String(max + 1).padStart(3, "0");
+}
+
+function makeContactFromInputs() {
+  let id = $("#c_id").value.trim();
+  if (!id) {
+    id = nextContactId();
+    $("#c_id").value = id;
+  }
+  return {
+    id,
+    nome: $("#c_nome").value.trim(),
+    telefono: $("#c_tel").value.trim(),
+    indirizzo: $("#c_addr").value.trim(),
+    stage: Stage.NUOVO,
+    attempts: [],
+    qualification: { motivo:"", tempi:"", prezzo_atteso:"", jtbd:"" },
+    postpone_count: 0,
+    pause_until: null,
+    discarded_reason: null,
+    appointment_when: null
+  };
+}
+
+/* Pulsazione bottone Aggiungi contatto */
+function updateAddPulse(){
+  const nome = $("#c_nome").value.trim();
+  const tel  = $("#c_tel").value.trim();
+  const addr = $("#c_addr").value.trim();
+  const shouldPulse = (nome || tel || addr) && !selectedId;
+  $("#btn_add").classList.toggle("pulse", !!shouldPulse);
+}
+["#c_nome","#c_tel","#c_addr","#c_id"].forEach(sel=>{
+  const el = $(sel);
+  if(el) el.addEventListener("input", updateAddPulse);
+});
+
+/* Popup contatto */
+function openContactModal(c){
+  const telRaw = String(c.telefono || "").trim();
+  const telDigits = telRaw.replace(/\D/g, "");
+  const telLink = telDigits ? `tel:${telDigits}` : "";
+  const waLink  = telDigits ? `https://wa.me/${telDigits}` : "";
+  const q = c.qualification || {};
+
+  $("#contactModalBody").innerHTML = `
+    <h3>Come contattarlo</h3>
+    <div class="pill">Telefono: <span class="mono">${escapeHtml(telRaw || "—")}</span></div>
+
+    <div class="modalActions">
+      <a class="modalBtn" href="${escapeAttr(telLink)}" ${telDigits ? "" : "onclick='return false'"}>📞 Chiama</a>
+      <a class="modalBtn" href="${escapeAttr(waLink)}" target="_blank" rel="noopener" ${telDigits ? "" : "onclick='return false'"}>🟢 WhatsApp</a>
+    </div>
+
+    <h3>Dettagli</h3>
+    <div class="pill">ID: <span class="mono">${escapeHtml(c.id)}</span></div>
+    <div style="margin-top:8px;"><b>Nome:</b> ${escapeHtml(c.nome || "—")}</div>
+    <div style="margin-top:6px;"><b>Indirizzo:</b> ${escapeHtml(c.indirizzo || "—")}</div>
+    <div style="margin-top:6px;"><b>Stato:</b> <span class="pill">${escapeHtml(c.stage)}</span></div>
+    <div style="margin-top:6px;"><b>Rimandi:</b> <span class="mono">${escapeHtml(String(c.postpone_count || 0))}</span></div>
+    ${c.pause_until ? `<div style="margin-top:6px;"><b>Pausa fino:</b> ${escapeHtml(new Date(c.pause_until).toLocaleString())}</div>` : ""}
+    ${c.discarded_reason ? `<div style="margin-top:6px;"><b>Scarto:</b> ${escapeHtml(c.discarded_reason)}</div>` : ""}
+
+    <h3>Qualifica</h3>
+    <div style="margin-top:6px;"><b>Motivo:</b> ${escapeHtml(q.motivo || "—")}</div>
+    <div style="margin-top:6px;"><b>Tempi:</b> ${escapeHtml(q.tempi || "—")}</div>
+    <div style="margin-top:6px;"><b>Prezzo atteso:</b> ${escapeHtml(q.prezzo_atteso || "—")}</div>
+    <div style="margin-top:6px;"><b>JTBD:</b> ${escapeHtml(q.jtbd || "—")}</div>
   `;
-  modal.style.display="flex";
-}
-function closeModal(){ modal.style.display="none"; }
-</script>
 
+  $("#contactModal").classList.add("show");
+  $("#contactModal").setAttribute("aria-hidden","false");
+}
+
+function closeContactModal(){
+  $("#contactModal").classList.remove("show");
+  $("#contactModal").setAttribute("aria-hidden","true");
+}
+
+$("#btnCloseContactModal").onclick = closeContactModal;
+$("#contactModal").addEventListener("click", (e)=>{
+  if(e.target && e.target.id === "contactModal") closeContactModal();
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape") closeContactModal();
+});
+
+function selectContact(id) {
+  selectedId = id;
+  const c = pc.get(id);
+
+  $("#selected_id").textContent = id;
+  $("#selected_stage").textContent = c.stage;
+  $("#selected_postpone").textContent = String(c.postpone_count || 0);
+
+  renderAttempts();
+  renderContacts();
+  saveState();
+  updateAddPulse();
+
+  // Popup automatico
+  openContactModal(c);
+}
+
+function setMsg(text, ok=true) {
+  $("#msg").innerHTML = ok
+    ? `<div class="ok">✅ ${escapeHtml(text)}</div>`
+    : `<div class="bad">⛔ ${escapeHtml(text)}</div>`;
+}
+
+function renderContacts() {
+  const rows = Object.values(pc.contacts)
+    .sort((a,b)=>a.id.localeCompare(b.id))
+    .map(c => {
+      const sel = (c.id === selectedId) ? 'style="font-weight:900;"' : '';
+      const pause = c.pause_until ? ` <span class="pill">pausa fino: ${new Date(c.pause_until).toLocaleDateString()}</span>` : "";
+      return `
+        <tr>
+          <td><a href="#" data-id="${escapeAttr(c.id)}">${escapeHtml(c.id)}</a></td>
+          <td ${sel}>${escapeHtml(c.nome || "—")}</td>
+          <td><span class="pill">${escapeHtml(c.stage)}</span>${pause}</td>
+          <td class="mono">${escapeHtml(c.telefono || "—")}</td>
+          <td>${escapeHtml(c.indirizzo || "—")}</td>
+        </tr>
+      `;
+    }).join("");
+
+  $("#contacts_table").innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Nome</th><th>Stato</th><th>Telefono</th><th>Indirizzo</th>
+        </tr>
+      </thead>
+      <tbody>${rows || `<tr><td colspan="5" class="small">Nessun contatto ancora.</td></tr>`}</tbody>
+    </table>
+  `;
+
+  document.querySelectorAll('a[data-id]').forEach(a => {
+    a.onclick = (ev) => { ev.preventDefault(); selectContact(a.dataset.id); };
+  });
+}
+
+function renderAttempts() {
+  if (!selectedId) {
+    $("#attempts_box").innerHTML = `<div class="small">Seleziona un contatto per vedere i tentativi.</div>`;
+    return;
+  }
+  const c = pc.get(selectedId);
+  const rows = (c.attempts || [])
+    .slice()
+    .reverse()
+    .map(a => `
+      <tr>
+        <td class="mono">${new Date(a.when).toLocaleString()}</td>
+        <td>${escapeHtml(a.channel)}</td>
+        <td><span class="pill">${escapeHtml(a.outcome)}</span></td>
+        <td>${escapeHtml(a.notes || "")}</td>
+      </tr>
+    `).join("");
+
+  $("#attempts_box").innerHTML = `
+    <table>
+      <thead><tr><th>Quando</th><th>Canale</th><th>Esito</th><th>Note</th></tr></thead>
+      <tbody>${rows || `<tr><td colspan="4" class="small">Nessun tentativo registrato.</td></tr>`}</tbody>
+    </table>
+  `;
+
+  $("#selected_stage").textContent = c.stage;
+  $("#selected_postpone").textContent = String(c.postpone_count || 0);
+}
+
+function renderKPI() {
+  const k = pc.dailyKPI(new Date());
+  $("#kpi_box").innerHTML = `
+    <div class="pill">Contatti: <span class="mono">${k.contacts}</span></div>
+    <div class="pill">Tentativi oggi: <span class="mono">${k.attempts}</span></div>
+    <div class="pill">Conversazioni oggi: <span class="mono">${k.conversations}</span></div>
+    <div class="pill">Appuntamenti (stato attuale): <span class="mono">${k.appointments}</span></div>
+    <div class="small" style="margin-top:8px;">
+      “Log” = questo storico tentativi (azioni registrate su quel contatto).
+    </div>
+  `;
+}
+
+function saveState() {
+  localStorage.setItem("procedure_controller_state_v1", JSON.stringify({
+    contacts: pc.contacts,
+    selectedId
+  }));
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem("procedure_controller_state_v1");
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    const p = new ProcedureController();
+    p.contacts = data.contacts || {};
+    selectedId = data.selectedId || null;
+    return p;
+  } catch { return null; }
+}
+
+function resetState() {
+  localStorage.removeItem("procedure_controller_state_v1");
+  location.reload();
+}
+
+/** ====== Bind buttons ====== **/
+
+$("#btn_add").onclick = () => {
+  try {
+    const c = makeContactFromInputs();
+    pc.addContact(c);
+    setMsg("Contatto aggiunto: " + c.id, true);
+    selectContact(c.id);
+    updateAddPulse();
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_select").onclick = () => {
+  try {
+    let id = $("#c_id").value.trim();
+    if (!id) {
+      // se non hai inserito nulla, selezione non può avvenire: genero ID e lo lascio lì
+      id = nextContactId();
+      $("#c_id").value = id;
+      throw new Error("Inserisci un ID esistente oppure aggiungi il contatto (ID suggerito: " + id + ")");
+    }
+    selectContact(id);
+    setMsg("Contatto selezionato: " + id, true);
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_attempt").onclick = () => {
+  try {
+    if (!selectedId) throw new Error("Seleziona prima un contatto");
+    pc.logAttempt(selectedId, $("#a_channel").value, $("#a_outcome").value, $("#a_notes").value.trim());
+    setMsg("Tentativo registrato (LOG aggiornato).", true);
+    renderAttempts();
+    renderKPI();
+    renderContacts();
+    saveState();
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_qualify").onclick = () => {
+  try {
+    if (!selectedId) throw new Error("Seleziona prima un contatto");
+    pc.setQualification(
+      selectedId,
+      $("#q_motivo").value.trim(),
+      $("#q_tempi").value.trim(),
+      $("#q_prezzo").value.trim(),
+      $("#q_jtbd").value
+    );
+    setMsg("Qualifica salvata. Stato → QUALIFICATO.", true);
+    renderAttempts();
+    renderContacts();
+    saveState();
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_appt").onclick = () => {
+  try {
+    if (!selectedId) throw new Error("Seleziona prima un contatto");
+    const when = $("#appt_when").value;
+    pc.scheduleAppointment(selectedId, when ? new Date(when).toISOString() : null);
+    setMsg("Appuntamento fissato. Stato → APPUNTAMENTO_FISSATO.", true);
+    renderAttempts();
+    renderContacts();
+    renderKPI();
+    saveState();
+  } catch (e) {
+    if (e instanceof DisciplineError) setMsg(e.message, false);
+    else setMsg(e.message || String(e), false);
+  }
+};
+
+$("#btn_postpone").onclick = () => {
+  try {
+    if (!selectedId) throw new Error("Seleziona prima un contatto");
+    pc.markPostponed(selectedId, "rimando manuale");
+    const c = pc.get(selectedId);
+    if (c.stage === Stage.PAUSA) {
+      setMsg("3 rimandi raggiunti → PAUSA fino a " + new Date(c.pause_until).toLocaleString(), true);
+    } else {
+      setMsg("Rimando registrato. Totale rimandi: " + c.postpone_count, true);
+    }
+    renderAttempts();
+    renderContacts();
+    renderKPI();
+    saveState();
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_discard").onclick = () => {
+  try {
+    if (!selectedId) throw new Error("Seleziona prima un contatto");
+    const reason = $("#discard_reason").value.trim();
+    pc.discard(selectedId, reason);
+    setMsg("Contatto scartato. Stato → SCARTATO.", true);
+    renderAttempts();
+    renderContacts();
+    renderKPI();
+    saveState();
+  } catch (e) { setMsg(e.message || String(e), false); }
+};
+
+$("#btn_kpi").onclick = () => renderKPI();
+$("#btn_reset").onclick = () => resetState();
+
+/* initial render */
+renderContacts();
+if (selectedId && pc.contacts[selectedId]) selectContact(selectedId);
+renderKPI();
+updateAddPulse();
+</script>
 </body>
 </html>
-
